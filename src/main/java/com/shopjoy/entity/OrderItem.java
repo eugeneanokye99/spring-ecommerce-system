@@ -5,13 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItem {
+public class OrderItem implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
     private int orderItemId;
     private int orderId;
     private int productId;
@@ -19,5 +23,4 @@ public class OrderItem {
     private double unitPrice;
     private double subtotal;
     private LocalDateTime createdAt;
-
 }

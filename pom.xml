@@ -41,6 +41,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
+		</dependency>
+
 		<!-- Source: https://mvnrepository.com/artifact/org.projectlombok/lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -48,7 +53,6 @@
 			<version>1.18.42</version>
 			<scope>compile</scope>
 		</dependency>
-
 
 		<!-- PostgreSQL JDBC -->
 		<dependency>
