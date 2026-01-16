@@ -26,4 +26,5 @@ public class User implements Serializable {
     private UserType userType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
 }

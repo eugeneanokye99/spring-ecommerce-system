@@ -121,9 +121,29 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         }
     }
 
+    public Optional<Address> findDefaultAddress(int userId) {
+        String sql = "SELECT * FROM addresses WHERE user_id = ? AND is_default = true";
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, addressRowMapper, userId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
+    @Transactional(readOnly = false)
+    public void clearDefaultAddresses(int userId) {
+        jdbcTemplate.update("UPDATE addresses SET is_default = false WHERE user_id = ?", userId);
+    }
+
+    @Transactional(readOnly = false)
+    public Address setDefaultAddress(int addressId) {
+        jdbcTemplate.update("UPDATE addresses SET is_default = true WHERE address_id = ?", addressId);
+        return findById(addressId).orElse(null);
+    }
+
     @Transactional(readOnly = false)
     public void setDefaultAddress(int addressId, int userId) {
-        jdbcTemplate.update("UPDATE addresses SET is_default = false WHERE user_id = ?", userId);
+        clearDefaultAddresses(userId);
         jdbcTemplate.update("UPDATE addresses SET is_default = true WHERE address_id = ?", addressId);
     }
 

@@ -155,4 +155,12 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
     public Double getTotalSalesByUser(int userId) {
         return jdbcTemplate.queryForObject("SELECT SUM(total_amount) FROM orders WHERE user_id = ?", Double.class, userId);
     }
+
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        String sql = "SELECT COUNT(*) FROM order_items oi " +
+                     "JOIN orders o ON oi.order_id = o.order_id " +
+                     "WHERE o.user_id = ? AND oi.product_id = ? AND o.status IN ('completed', 'shipped')";
+        Long count = jdbcTemplate.queryForObject(sql, Long.class, userId, productId);
+        return count != null && count > 0;
+    }
 }
