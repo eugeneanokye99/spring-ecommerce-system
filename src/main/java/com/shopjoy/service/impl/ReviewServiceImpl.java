@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The type Review service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
@@ -23,14 +26,20 @@ public class ReviewServiceImpl implements ReviewService {
     
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
-    
+
+    /**
+     * Instantiates a new Review service.
+     *
+     * @param reviewRepository the review repository
+     * @param orderRepository  the order repository
+     */
     public ReviewServiceImpl(ReviewRepository reviewRepository, OrderRepository orderRepository) {
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Review createReview(Review review) {
         logger.info("Creating review for product {} by user {}", 
                 review.getProductId(), review.getUserId());
@@ -75,7 +84,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Review updateReview(Review review) {
         logger.info("Updating review ID: {}", review.getReviewId());
         
@@ -86,7 +95,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteReview(Integer reviewId) {
         logger.info("Deleting review ID: {}", reviewId);
         
@@ -113,7 +122,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Review markReviewAsHelpful(Integer reviewId) {
         logger.debug("Incrementing helpful count for review {}", reviewId);
         

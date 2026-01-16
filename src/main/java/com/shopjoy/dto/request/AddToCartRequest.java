@@ -4,10 +4,14 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request DTO for adding items to cart.
  */
+@Setter
+@Getter
 public class AddToCartRequest {
     
     @NotNull(message = "User ID is required")
@@ -22,31 +26,11 @@ public class AddToCartRequest {
     @Min(value = 1, message = "Quantity must be at least 1")
     @Max(value = 999, message = "Quantity cannot exceed 999")
     private Integer quantity;
-    
+
+    /**
+     * Instantiates a new Add to cart request.
+     */
     public AddToCartRequest() {
     }
-    
-    public Integer getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    
-    public Integer getProductId() {
-        return productId;
-    }
-    
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
-    
-    public Integer getQuantity() {
-        return quantity;
-    }
-    
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
+
 }

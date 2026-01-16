@@ -16,13 +16,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Address repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class AddressRepository implements GenericRepository<Address, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Address> addressRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Address> addressRowMapper = (rs, _) -> {
         Address address = new Address();
         address.setAddressId(rs.getInt("address_id"));
         address.setUserId(rs.getInt("user_id"));
@@ -39,6 +42,11 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         return address;
     };
 
+    /**
+     * Instantiates a new Address repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public AddressRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -60,7 +68,7 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Address save(Address address) {
         String sql = "INSERT INTO addresses (user_id, address_type, street_address, city, state, postal_code, country, is_default) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING address_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -81,7 +89,7 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Address update(Address address) {
         String sql = "UPDATE addresses SET street_address = ?, city = ?, state = ?, postal_code = ?, country = ?, is_default = ? WHERE address_id = ?";
         jdbcTemplate.update(sql, address.getStreetAddress(), address.getCity(), address.getState(), 
@@ -90,7 +98,7 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer addressId) {
         return jdbcTemplate.update("DELETE FROM addresses WHERE address_id = ?", addressId) > 0;
     }
@@ -107,20 +115,24 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Find by user id list.
+     *
+     * @param userId the user id
+     * @return the list
+     */
     public List<Address> findByUserId(int userId) {
         return jdbcTemplate.query("SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC", 
             addressRowMapper, userId);
     }
 
-    public Optional<Address> findDefaultAddress(int userId, AddressType type) {
-        String sql = "SELECT * FROM addresses WHERE user_id = ? AND address_type = ? AND is_default = true";
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, addressRowMapper, userId, type.name().toLowerCase()));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
-    }
 
+    /**
+     * Find default address optional.
+     *
+     * @param userId the user id
+     * @return the optional
+     */
     public Optional<Address> findDefaultAddress(int userId) {
         String sql = "SELECT * FROM addresses WHERE user_id = ? AND is_default = true";
         try {
@@ -130,25 +142,26 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         }
     }
 
-    @Transactional(readOnly = false)
+    /**
+     * Clear default addresses.
+     *
+     * @param userId the user id
+     */
+    @Transactional()
     public void clearDefaultAddresses(int userId) {
         jdbcTemplate.update("UPDATE addresses SET is_default = false WHERE user_id = ?", userId);
     }
 
-    @Transactional(readOnly = false)
+    /**
+     * Sets default address.
+     *
+     * @param addressId the address id
+     * @return the default address
+     */
+    @Transactional()
     public Address setDefaultAddress(int addressId) {
         jdbcTemplate.update("UPDATE addresses SET is_default = true WHERE address_id = ?", addressId);
         return findById(addressId).orElse(null);
     }
 
-    @Transactional(readOnly = false)
-    public void setDefaultAddress(int addressId, int userId) {
-        clearDefaultAddresses(userId);
-        jdbcTemplate.update("UPDATE addresses SET is_default = true WHERE address_id = ?", addressId);
-    }
-
-    public long countByUserId(int userId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM addresses WHERE user_id = ?", Long.class, userId);
-        return count != null ? count : 0L;
-    }
 }

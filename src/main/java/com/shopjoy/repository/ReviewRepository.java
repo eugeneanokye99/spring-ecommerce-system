@@ -15,13 +15,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Review repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class ReviewRepository implements GenericRepository<Review, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Review> reviewRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Review> reviewRowMapper = (rs, _) -> {
         Review review = new Review();
         review.setReviewId(rs.getInt("review_id"));
         review.setProductId(rs.getInt("product_id"));
@@ -38,6 +41,11 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
         return review;
     };
 
+    /**
+     * Instantiates a new Review repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public ReviewRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -59,7 +67,7 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Review save(Review review) {
         String sql = "INSERT INTO reviews (product_id, user_id, rating, title, comment, is_verified_purchase, helpful_count) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING review_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -79,7 +87,7 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Review update(Review review) {
         String sql = "UPDATE reviews SET rating = ?, title = ?, comment = ?, updated_at = CURRENT_TIMESTAMP WHERE review_id = ?";
         jdbcTemplate.update(sql, review.getRating(), review.getTitle(), review.getComment(), review.getReviewId());
@@ -87,7 +95,7 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer reviewId) {
         return jdbcTemplate.update("DELETE FROM reviews WHERE review_id = ?", reviewId) > 0;
     }
@@ -104,45 +112,56 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Find by product id list.
+     *
+     * @param productId the product id
+     * @return the list
+     */
     public List<Review> findByProductId(int productId) {
         return jdbcTemplate.query("SELECT * FROM reviews WHERE product_id = ? ORDER BY created_at DESC", 
             reviewRowMapper, productId);
     }
 
+    /**
+     * Find by user id list.
+     *
+     * @param userId the user id
+     * @return the list
+     */
     public List<Review> findByUserId(int userId) {
         return jdbcTemplate.query("SELECT * FROM reviews WHERE user_id = ? ORDER BY created_at DESC", 
             reviewRowMapper, userId);
     }
 
-    public List<Review> findByRating(int rating) {
-        return jdbcTemplate.query("SELECT * FROM reviews WHERE rating = ? ORDER BY created_at DESC", 
-            reviewRowMapper, rating);
+    /**
+     * Increment helpful count.
+     *
+     * @param reviewId the review id
+     */
+    @Transactional()
+    public void incrementHelpfulCount(int reviewId) {
+        jdbcTemplate.update("UPDATE reviews SET helpful_count = helpful_count + 1 WHERE review_id = ?", reviewId);
     }
 
-    public List<Review> findVerifiedPurchases(int productId) {
-        return jdbcTemplate.query("SELECT * FROM reviews WHERE product_id = ? AND is_verified_purchase = true ORDER BY created_at DESC", 
-            reviewRowMapper, productId);
-    }
-
-    @Transactional(readOnly = false)
-    public boolean incrementHelpfulCount(int reviewId) {
-        return jdbcTemplate.update("UPDATE reviews SET helpful_count = helpful_count + 1 WHERE review_id = ?", reviewId) > 0;
-    }
-
+    /**
+     * Gets average rating.
+     *
+     * @param productId the product id
+     * @return the average rating
+     */
     public Double getAverageRating(int productId) {
         return jdbcTemplate.queryForObject("SELECT AVG(rating) FROM reviews WHERE product_id = ?", Double.class, productId);
     }
 
-    public long countByProductId(int productId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reviews WHERE product_id = ?", Long.class, productId);
-        return count != null ? count : 0L;
-    }
 
-    public long countByUserId(int userId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reviews WHERE user_id = ?", Long.class, userId);
-        return count != null ? count : 0L;
-    }
-
+    /**
+     * Has user reviewed product boolean.
+     *
+     * @param userId    the user id
+     * @param productId the product id
+     * @return the boolean
+     */
     public boolean hasUserReviewedProduct(int userId, int productId) {
         Long count = jdbcTemplate.queryForObject(
             "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND product_id = ?", 

@@ -1,18 +1,21 @@
 package com.shopjoy.dto.mapper;
 
 import com.shopjoy.dto.request.CreateOrderRequest;
-import com.shopjoy.dto.request.UpdateOrderRequest;
 import com.shopjoy.dto.response.OrderResponse;
 import com.shopjoy.entity.Order;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Mapper for Order entity and DTOs.
  */
 public class OrderMapper {
-    
+
+    /**
+     * To order.
+     *
+     * @param request the request
+     * @return the order
+     */
     public static Order toOrder(CreateOrderRequest request) {
         if (request == null) {
             return null;
@@ -25,7 +28,13 @@ public class OrderMapper {
         
         return order;
     }
-    
+
+    /**
+     * To order response.
+     *
+     * @param order the order
+     * @return the order response
+     */
     public static OrderResponse toOrderResponse(Order order) {
         if (order == null) {
             return null;
@@ -45,37 +54,5 @@ public class OrderMapper {
         );
     }
     
-    public static List<OrderResponse> toOrderResponseList(List<Order> orders) {
-        if (orders == null) {
-            return null;
-        }
-        
-        List<OrderResponse> responses = new ArrayList<>();
-        for (Order order : orders) {
-            responses.add(toOrderResponse(order));
-        }
-        return responses;
-    }
-    
-    public static void updateOrderFromRequest(Order order, UpdateOrderRequest request) {
-        if (order == null || request == null) {
-            return;
-        }
-        
-        if (request.getStatus() != null) {
-            order.setStatus(request.getStatus());
-        }
-        
-        if (request.getPaymentStatus() != null) {
-            order.setPaymentStatus(request.getPaymentStatus());
-        }
-        
-        if (request.getShippingAddress() != null) {
-            order.setShippingAddress(request.getShippingAddress());
-        }
-        
-        if (request.getNotes() != null) {
-            order.setNotes(request.getNotes());
-        }
-    }
+
 }

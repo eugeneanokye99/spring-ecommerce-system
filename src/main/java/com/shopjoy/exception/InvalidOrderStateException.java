@@ -7,7 +7,4 @@ public class InvalidOrderStateException extends BusinessException {
                 "INVALID_ORDER_STATE");
     }
     
-    public InvalidOrderStateException(String message) {
-        super(message, "INVALID_ORDER_STATE");
-    }
 }

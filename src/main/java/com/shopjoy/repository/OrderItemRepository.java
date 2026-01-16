@@ -15,13 +15,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Order item repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class OrderItemRepository implements GenericRepository<OrderItem, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<OrderItem> orderItemRowMapper = (rs, rowNum) -> {
+    private final RowMapper<OrderItem> orderItemRowMapper = (rs, _) -> {
         OrderItem item = new OrderItem();
         item.setOrderItemId(rs.getInt("order_item_id"));
         item.setOrderId(rs.getInt("order_id"));
@@ -34,6 +37,11 @@ public class OrderItemRepository implements GenericRepository<OrderItem, Integer
         return item;
     };
 
+    /**
+     * Instantiates a new Order item repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public OrderItemRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -55,7 +63,7 @@ public class OrderItemRepository implements GenericRepository<OrderItem, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public OrderItem save(OrderItem item) {
         String sql = "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?) RETURNING order_item_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -73,7 +81,7 @@ public class OrderItemRepository implements GenericRepository<OrderItem, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public OrderItem update(OrderItem item) {
         String sql = "UPDATE order_items SET quantity = ?, unit_price = ?, subtotal = ? WHERE order_item_id = ?";
         jdbcTemplate.update(sql, item.getQuantity(), item.getUnitPrice(), item.getSubtotal(), item.getOrderItemId());
@@ -81,7 +89,7 @@ public class OrderItemRepository implements GenericRepository<OrderItem, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer orderItemId) {
         return jdbcTemplate.update("DELETE FROM order_items WHERE order_item_id = ?", orderItemId) > 0;
     }
@@ -98,32 +106,14 @@ public class OrderItemRepository implements GenericRepository<OrderItem, Integer
         return count != null && count > 0;
     }
 
+    /**
+     * Find by order id list.
+     *
+     * @param orderId the order id
+     * @return the list
+     */
     public List<OrderItem> findByOrderId(int orderId) {
         return jdbcTemplate.query("SELECT * FROM order_items WHERE order_id = ?", orderItemRowMapper, orderId);
     }
 
-    public List<OrderItem> findByProductId(int productId) {
-        return jdbcTemplate.query("SELECT * FROM order_items WHERE product_id = ?", orderItemRowMapper, productId);
-    }
-
-    @Transactional(readOnly = false)
-    public void saveAll(List<OrderItem> items) {
-        String sql = "INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)";
-        jdbcTemplate.batchUpdate(sql, items, items.size(), (ps, item) -> {
-            ps.setInt(1, item.getOrderId());
-            ps.setInt(2, item.getProductId());
-            ps.setInt(3, item.getQuantity());
-            ps.setDouble(4, item.getUnitPrice());
-            ps.setDouble(5, item.getSubtotal());
-        });
-    }
-
-    public long countByOrderId(int orderId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM order_items WHERE order_id = ?", Long.class, orderId);
-        return count != null ? count : 0L;
-    }
-
-    public Double getTotalByOrderId(int orderId) {
-        return jdbcTemplate.queryForObject("SELECT SUM(subtotal) FROM order_items WHERE order_id = ?", Double.class, orderId);
-    }
 }

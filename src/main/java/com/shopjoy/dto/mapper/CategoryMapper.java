@@ -5,14 +5,18 @@ import com.shopjoy.dto.request.UpdateCategoryRequest;
 import com.shopjoy.dto.response.CategoryResponse;
 import com.shopjoy.entity.Category;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Mapper for Category entity and DTOs.
  */
 public class CategoryMapper {
-    
+
+    /**
+     * To category category.
+     *
+     * @param request the request
+     * @return the category
+     */
     public static Category toCategory(CreateCategoryRequest request) {
         if (request == null) {
             return null;
@@ -25,7 +29,13 @@ public class CategoryMapper {
         
         return category;
     }
-    
+
+    /**
+     * To category response category response.
+     *
+     * @param category the category
+     * @return the category response
+     */
     public static CategoryResponse toCategoryResponse(Category category) {
         if (category == null) {
             return null;
@@ -39,19 +49,14 @@ public class CategoryMapper {
             category.getCreatedAt()
         );
     }
-    
-    public static List<CategoryResponse> toCategoryResponseList(List<Category> categories) {
-        if (categories == null) {
-            return null;
-        }
-        
-        List<CategoryResponse> responses = new ArrayList<>();
-        for (Category category : categories) {
-            responses.add(toCategoryResponse(category));
-        }
-        return responses;
-    }
-    
+
+
+    /**
+     * Update category from request.
+     *
+     * @param category the category
+     * @param request  the request
+     */
     public static void updateCategoryFromRequest(Category category, UpdateCategoryRequest request) {
         if (category == null || request == null) {
             return;

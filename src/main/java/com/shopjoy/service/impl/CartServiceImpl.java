@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Cart service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class CartServiceImpl implements CartService {
@@ -27,7 +30,14 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
     private final InventoryService inventoryService;
-    
+
+    /**
+     * Instantiates a new Cart service.
+     *
+     * @param cartItemRepository the cart item repository
+     * @param productService     the product service
+     * @param inventoryService   the inventory service
+     */
     public CartServiceImpl(CartItemRepository cartItemRepository,
                           ProductService productService,
                           InventoryService inventoryService) {
@@ -37,7 +47,7 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public CartItem addToCart(Integer userId, Integer productId, int quantity) {
         logger.info("Adding product {} to cart for user {}", productId, userId);
         
@@ -76,7 +86,7 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public CartItem updateCartItemQuantity(Integer cartItemId, int newQuantity) {
         logger.info("Updating cart item {} quantity to {}", cartItemId, newQuantity);
         
@@ -96,7 +106,7 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void removeFromCart(Integer cartItemId) {
         logger.info("Removing cart item {}", cartItemId);
         
@@ -113,7 +123,7 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void clearCart(Integer userId) {
         logger.info("Clearing cart for user {}", userId);
         cartItemRepository.clearCart(userId);

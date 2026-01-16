@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The type Address service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class AddressServiceImpl implements AddressService {
@@ -20,13 +23,18 @@ public class AddressServiceImpl implements AddressService {
     private static final Logger logger = LoggerFactory.getLogger(AddressServiceImpl.class);
     
     private final AddressRepository addressRepository;
-    
+
+    /**
+     * Instantiates a new Address service.
+     *
+     * @param addressRepository the address repository
+     */
     public AddressServiceImpl(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Address createAddress(Address address) {
         logger.info("Creating new address for user {}", address.getUserId());
         
@@ -49,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Address updateAddress(Address address) {
         logger.info("Updating address ID: {}", address.getAddressId());
         
@@ -60,7 +68,7 @@ public class AddressServiceImpl implements AddressService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteAddress(Integer addressId) {
         logger.info("Deleting address ID: {}", addressId);
         
@@ -72,7 +80,7 @@ public class AddressServiceImpl implements AddressService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Address setDefaultAddress(Integer addressId) {
         logger.info("Setting default address {}", addressId);
         

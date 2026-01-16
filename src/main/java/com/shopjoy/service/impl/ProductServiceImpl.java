@@ -14,6 +14,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * The type Product service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
@@ -21,13 +24,18 @@ public class ProductServiceImpl implements ProductService {
     private static final Logger logger = LoggerFactory.getLogger(ProductServiceImpl.class);
     
     private final ProductRepository productRepository;
-    
+
+    /**
+     * Instantiates a new Product service.
+     *
+     * @param productRepository the product repository
+     */
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Product createProduct(Product product) {
         logger.info("Creating new product: {}", product.getProductName());
         
@@ -89,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Product updateProduct(Product product) {
         logger.info("Updating product ID: {}", product.getProductId());
         
@@ -107,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Product updateProductPrice(Integer productId, double newPrice) {
         logger.info("Updating price for product ID: {} to {}", productId, newPrice);
         
@@ -126,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Product activateProduct(Integer productId) {
         logger.info("Activating product ID: {}", productId);
         
@@ -138,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Product deactivateProduct(Integer productId) {
         logger.info("Deactivating product ID: {}", productId);
         
@@ -150,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteProduct(Integer productId) {
         logger.info("Deleting product ID: {}", productId);
         

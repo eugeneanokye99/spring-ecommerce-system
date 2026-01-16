@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Inventory service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class InventoryServiceImpl implements InventoryService {
@@ -23,13 +26,18 @@ public class InventoryServiceImpl implements InventoryService {
     private static final Logger logger = LoggerFactory.getLogger(InventoryServiceImpl.class);
     
     private final InventoryRepository inventoryRepository;
-    
+
+    /**
+     * Instantiates a new Inventory service.
+     *
+     * @param inventoryRepository the inventory repository
+     */
     public InventoryServiceImpl(InventoryRepository inventoryRepository) {
         this.inventoryRepository = inventoryRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory createInventory(Inventory inventory) {
         logger.info("Creating inventory for product ID: {}", inventory.getProductId());
         
@@ -76,7 +84,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory updateStock(Integer productId, int newQuantity) {
         logger.info("Updating stock for product ID: {} to {}", productId, newQuantity);
         
@@ -96,7 +104,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory addStock(Integer productId, int quantity) {
         logger.info("Adding {} units to product ID: {}", quantity, productId);
         
@@ -117,7 +125,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory removeStock(Integer productId, int quantity) {
         logger.info("Removing {} units from product ID: {}", quantity, productId);
         
@@ -144,7 +152,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void reserveStock(Integer productId, int quantity) {
         logger.debug("Reserving {} units of product ID: {}", quantity, productId);
         
@@ -166,7 +174,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void releaseStock(Integer productId, int quantity) {
         logger.debug("Releasing {} units of product ID: {}", quantity, productId);
         
@@ -191,7 +199,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory updateReorderLevel(Integer productId, int reorderLevel) {
         logger.info("Updating reorder level for product ID: {} to {}", productId, reorderLevel);
         

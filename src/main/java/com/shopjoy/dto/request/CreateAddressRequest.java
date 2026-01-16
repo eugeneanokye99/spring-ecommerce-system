@@ -5,10 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request DTO for creating a new address.
  */
+@Setter
+@Getter
 public class CreateAddressRequest {
     
     @NotNull(message = "User ID is required")
@@ -39,71 +43,11 @@ public class CreateAddressRequest {
     private String country;
     
     private Boolean isDefault = false;
-    
+
+    /**
+     * Instantiates a new Create address request.
+     */
     public CreateAddressRequest() {
     }
-    
-    public Integer getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    
-    public AddressType getAddressType() {
-        return addressType;
-    }
-    
-    public void setAddressType(AddressType addressType) {
-        this.addressType = addressType;
-    }
-    
-    public String getStreetAddress() {
-        return streetAddress;
-    }
-    
-    public void setStreetAddress(String streetAddress) {
-        this.streetAddress = streetAddress;
-    }
-    
-    public String getCity() {
-        return city;
-    }
-    
-    public void setCity(String city) {
-        this.city = city;
-    }
-    
-    public String getState() {
-        return state;
-    }
-    
-    public void setState(String state) {
-        this.state = state;
-    }
-    
-    public String getPostalCode() {
-        return postalCode;
-    }
-    
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
-    }
-    
-    public String getCountry() {
-        return country;
-    }
-    
-    public void setCountry(String country) {
-        this.country = country;
-    }
-    
-    public Boolean getIsDefault() {
-        return isDefault;
-    }
-    
-    public void setIsDefault(Boolean isDefault) {
-        this.isDefault = isDefault;
-    }
+
 }

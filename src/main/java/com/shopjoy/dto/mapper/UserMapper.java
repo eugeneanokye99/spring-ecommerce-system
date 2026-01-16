@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Mapper utility for converting between User entity and DTOs.
  * All methods are static - no need to create an instance.
- * 
+ * <p>
  * Usage examples:
  * - User user = UserMapper.toUser(createRequest);
  * - UserResponse response = UserMapper.toUserResponse(user);
@@ -35,11 +35,11 @@ public class UserMapper {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPasswordHash(request.getPassword()); // Note: Password will be hashed by service
+        user.setPasswordHash(request.getPassword());
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhone());
-        user.setUserType(UserType.CUSTOMER); // Default to CUSTOMER
+        user.setUserType(UserType.CUSTOMER);
         
         return user;
     }

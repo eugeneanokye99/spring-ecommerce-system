@@ -23,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
+/**
+ * The type Order service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
@@ -34,7 +37,16 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryService inventoryService;
     private final ProductService productService;
     private final UserService userService;
-    
+
+    /**
+     * Instantiates a new Order service.
+     *
+     * @param orderRepository     the order repository
+     * @param orderItemRepository the order item repository
+     * @param inventoryService    the inventory service
+     * @param productService      the product service
+     * @param userService         the user service
+     */
     public OrderServiceImpl(OrderRepository orderRepository,
                            OrderItemRepository orderItemRepository,
                            InventoryService inventoryService,
@@ -49,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
     
     /**
      * COMPLEX TRANSACTION EXAMPLE
-     * 
+     * <p>
      * This method demonstrates a multi-entity transaction:
      * 1. Validates user exists
      * 2. Validates all products exist and are active
@@ -57,19 +69,19 @@ public class OrderServiceImpl implements OrderService {
      * 4. Reserves inventory (decreases stock)
      * 5. Creates order
      * 6. Creates order items
-     * 
+     * <p>
      * If ANY step fails, entire transaction is rolled back.
      * Uses SERIALIZABLE isolation to prevent phantom reads during stock checks.
      */
     @Override
-    @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
+    @Transactional(, isolation = Isolation.SERIALIZABLE)
     public Order createOrder(Integer userId, List<OrderItem> orderItems, 
                             String shippingAddress, String paymentMethod) {
         logger.info("Creating order for user ID: {} with {} items", userId, orderItems.size());
         
         userService.getUserById(userId);
         
-        if (orderItems == null || orderItems.isEmpty()) {
+        if (orderItems.isEmpty()) {
             throw new ValidationException("Order must contain at least one item");
         }
         
@@ -164,13 +176,13 @@ public class OrderServiceImpl implements OrderService {
     
     /**
      * STATE MACHINE PATTERN EXAMPLE
-     * 
+     * <p>
      * Order status transitions follow a specific workflow:
      * PENDING -> PROCESSING -> SHIPPED -> DELIVERED
      *         -> CANCELLED (from PENDING or PROCESSING only)
      */
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order updateOrderStatus(Integer orderId, OrderStatus newStatus) {
         logger.info("Updating order {} status to: {}", orderId, newStatus);
         
@@ -189,7 +201,7 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order confirmOrder(Integer orderId) {
         Order order = getOrderById(orderId);
         
@@ -201,7 +213,7 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order shipOrder(Integer orderId) {
         Order order = getOrderById(orderId);
         
@@ -213,7 +225,7 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order completeOrder(Integer orderId) {
         Order order = getOrderById(orderId);
         
@@ -226,16 +238,16 @@ public class OrderServiceImpl implements OrderService {
     
     /**
      * COMPLEX ROLLBACK SCENARIO
-     * 
+     * <p> 
      * When cancelling an order, we must:
-     * 1. Validate order can be cancelled
+     * 1. Validate order can be canceled
      * 2. Release reserved inventory back to stock
      * 3. Update order status
-     * 
+     * <p> 
      * If inventory release fails, entire transaction rolls back.
      */
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order cancelOrder(Integer orderId) {
         logger.info("Cancelling order ID: {}", orderId);
         

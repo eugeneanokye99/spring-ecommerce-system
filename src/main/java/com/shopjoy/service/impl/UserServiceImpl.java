@@ -18,6 +18,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type User service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
@@ -25,13 +28,18 @@ public class UserServiceImpl implements UserService {
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
     
     private final UserRepository userRepository;
-    
+
+    /**
+     * Instantiates a new User service.
+     *
+     * @param userRepository the user repository
+     */
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public User registerUser(User user) {
         logger.info("Attempting to register new user with username: {}", user.getUsername());
         
@@ -109,7 +117,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public User updateUserProfile(User user) {
         logger.info("Updating profile for user ID: {}", user.getUserId());
         
@@ -140,7 +148,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void changePassword(Integer userId, String oldPassword, String newPassword) {
         logger.info("Password change requested for user ID: {}", userId);
         
@@ -158,7 +166,7 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteUser(Integer userId) {
         logger.info("Deleting user with ID: {}", userId);
         

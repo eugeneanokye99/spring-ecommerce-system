@@ -7,18 +7,18 @@ import java.util.Optional;
 
 /**
  * Generic Repository interface for CRUD operations using Spring JDBC.
- * 
+ * <p>
  * This replaces the old GenericDAO interface with Spring-based conventions:
  * - Uses Optional<T> instead of returning null for findById
  * - Throws Spring's DataAccessException instead of SQLException
  * - Follows Spring Data naming conventions for consistency
- * 
+ * <p>
  * Key differences from old GenericDAO:
  * 1. SQLException replaced with Spring's DataAccessException hierarchy
  * 2. findById returns Optional<T> for null-safety
  * 3. Methods are designed for Spring transaction management
  * 4. Exception handling is delegated to Spring's exception translation
- * 
+ * <p>
  * Spring's DataAccessException hierarchy includes:
  * - DataIntegrityViolationException (constraint violations)
  * - DuplicateKeyException (unique constraint violations)
@@ -35,16 +35,16 @@ public interface GenericRepository<T, ID> {
 
     /**
      * Find an entity by its identifier.
-     * 
+     * <p>
      * Returns Optional<T> to handle null cases explicitly and avoid NPE.
-     * 
+     * <p>
      * Usage:
      * Optional<User> userOpt = userRepository.findById(123);
      * if (userOpt.isPresent()) {
      *     User user = userOpt.get();
      *     // process user
      * }
-     * 
+     * <p>
      * Or with lambda:
      * userRepository.findById(123)
      *     .ifPresent(user -> System.out.println(user.getUsername()));
@@ -57,21 +57,21 @@ public interface GenericRepository<T, ID> {
 
     /**
      * Retrieve all entities of this type.
-     * 
+     * <p>
      * Returns empty list if no entities found (never null).
      * Consider adding pagination for large result sets.
      * 
-     * @return list of all entities (may be empty, never null)
+     * @return list of all entities (maybe empty, never null)
      * @throws DataAccessException if a database access error occurs
      */
     List<T> findAll() throws DataAccessException;
 
     /**
      * Persist a new entity in the database.
-     * 
+     * <p>
      * The implementation should populate any generated identifiers (like auto-increment IDs)
      * on the passed entity and return it.
-     * 
+     * <p>
      * For entities with database-generated IDs:
      * - Use RETURNING clause (PostgreSQL) or GeneratedKeyHolder (other databases)
      * - Set the generated ID on the entity object
@@ -86,7 +86,7 @@ public interface GenericRepository<T, ID> {
 
     /**
      * Update an existing entity in the database.
-     * 
+     * <p>
      * Only updates the entity if it exists. Does not create new entity.
      * Consider returning boolean or int (rows affected) to indicate success.
      * 
@@ -109,7 +109,7 @@ public interface GenericRepository<T, ID> {
 
     /**
      * Count total entities of this type in the database.
-     * 
+     * <p>
      * Useful for pagination calculations.
      * 
      * @return the total count (0 if no entities exist)
@@ -119,7 +119,7 @@ public interface GenericRepository<T, ID> {
 
     /**
      * Check if an entity exists by its identifier.
-     * 
+     * <p>
      * More efficient than findById() when you only need existence check.
      * Typically implemented as: SELECT 1 FROM table WHERE id = ? LIMIT 1
      * 

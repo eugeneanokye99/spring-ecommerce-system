@@ -15,13 +15,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Category repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class CategoryRepository implements GenericRepository<Category, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Category> categoryRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Category> categoryRowMapper = (rs, _) -> {
         Category category = new Category();
         category.setCategoryId(rs.getInt("category_id"));
         category.setCategoryName(rs.getString("category_name"));
@@ -33,6 +36,11 @@ public class CategoryRepository implements GenericRepository<Category, Integer> 
         return category;
     };
 
+    /**
+     * Instantiates a new Category repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public CategoryRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -54,7 +62,7 @@ public class CategoryRepository implements GenericRepository<Category, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Category save(Category category) {
         String sql = "INSERT INTO categories (category_name, description, parent_category_id) VALUES (?, ?, ?) RETURNING category_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -74,7 +82,7 @@ public class CategoryRepository implements GenericRepository<Category, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Category update(Category category) {
         String sql = "UPDATE categories SET category_name = ?, description = ?, parent_category_id = ? WHERE category_id = ?";
         jdbcTemplate.update(sql, category.getCategoryName(), category.getDescription(), 
@@ -83,7 +91,7 @@ public class CategoryRepository implements GenericRepository<Category, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer categoryId) {
         return jdbcTemplate.update("DELETE FROM categories WHERE category_id = ?", categoryId) > 0;
     }
@@ -100,23 +108,36 @@ public class CategoryRepository implements GenericRepository<Category, Integer> 
         return count != null && count > 0;
     }
 
+    /**
+     * Find top level categories list.
+     *
+     * @return the list
+     */
     public List<Category> findTopLevelCategories() {
         return jdbcTemplate.query("SELECT * FROM categories WHERE parent_category_id IS NULL ORDER BY category_name", categoryRowMapper);
     }
 
+    /**
+     * Find subcategories list.
+     *
+     * @param parentCategoryId the parent category id
+     * @return the list
+     */
     public List<Category> findSubcategories(Integer parentCategoryId) {
         if (parentCategoryId == null) return List.of();
         return jdbcTemplate.query("SELECT * FROM categories WHERE parent_category_id = ? ORDER BY category_name", 
             categoryRowMapper, parentCategoryId);
     }
 
+    /**
+     * Has subcategories boolean.
+     *
+     * @param categoryId the category id
+     * @return the boolean
+     */
     public boolean hasSubcategories(int categoryId) {
         Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories WHERE parent_category_id = ?", Long.class, categoryId);
         return count != null && count > 0;
     }
 
-    public long countSubcategories(int categoryId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM categories WHERE parent_category_id = ?", Long.class, categoryId);
-        return count != null ? count : 0L;
-    }
 }

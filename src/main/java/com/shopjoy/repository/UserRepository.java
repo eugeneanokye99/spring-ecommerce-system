@@ -14,15 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * The type User repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class UserRepository implements GenericRepository<User, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<User> userRowMapper = (rs, rowNum) -> {
+    private final RowMapper<User> userRowMapper = (rs, _) -> {
         User user = new User();
         user.setUserId(rs.getInt("user_id"));
         user.setUsername(rs.getString("username"));
@@ -39,6 +43,11 @@ public class UserRepository implements GenericRepository<User, Integer> {
         return user;
     };
 
+    /**
+     * Instantiates a new User repository.
+     *
+     * @param jdbcTemplate the JDBC template
+     */
     public UserRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -48,10 +57,10 @@ public class UserRepository implements GenericRepository<User, Integer> {
         if (userId == null) return Optional.empty();
         
         String sql = """
-                SELECT user_id, username, email, password_hash, first_name, last_name, 
+                SELECT user_id, username, email, password_hash, first_name, last_name,\s
                        phone, user_type, created_at, updated_at
                 FROM users WHERE user_id = ?
-                """;
+               \s""";
         
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, userRowMapper, userId));
@@ -63,20 +72,20 @@ public class UserRepository implements GenericRepository<User, Integer> {
     @Override
     public List<User> findAll() {
         String sql = """
-                SELECT user_id, username, email, password_hash, first_name, last_name, 
+                SELECT user_id, username, email, password_hash, first_name, last_name,\s
                        phone, user_type, created_at, updated_at
                 FROM users ORDER BY username
-                """;
+               \s""";
         return jdbcTemplate.query(sql, userRowMapper);
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public User save(User user) {
         String hashedPassword = BCrypt.hashpw(user.getPasswordHash(), BCrypt.gensalt());
         
         String sql = """
-                INSERT INTO users (username, email, password_hash, first_name, last_name, 
+                INSERT INTO users (username, email, password_hash, first_name, last_name,
                                  phone, user_type, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING user_id
@@ -97,20 +106,19 @@ public class UserRepository implements GenericRepository<User, Integer> {
             return ps;
         }, keyHolder);
         
-        user.setUserId(keyHolder.getKey().intValue());
-        user.setPasswordHash(hashedPassword);
+        user.setUserId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return user;
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public User update(User user) {
         String sql = """
-                UPDATE users 
-                SET email = ?, first_name = ?, last_name = ?, phone = ?, 
+                UPDATE users\s
+                SET email = ?, first_name = ?, last_name = ?, phone = ?,\s
                     user_type = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ?
-                """;
+               \s""";
         
         jdbcTemplate.update(sql,
                 user.getEmail(),
@@ -124,7 +132,7 @@ public class UserRepository implements GenericRepository<User, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer userId) {
         String sql = "DELETE FROM users WHERE user_id = ?";
         return jdbcTemplate.update(sql, userId) > 0;
@@ -145,14 +153,20 @@ public class UserRepository implements GenericRepository<User, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Find by username optional.
+     *
+     * @param username the username
+     * @return the optional
+     */
     public Optional<User> findByUsername(String username) {
         if (username == null) return Optional.empty();
         
         String sql = """
-                SELECT user_id, username, email, password_hash, first_name, last_name, 
+                SELECT user_id, username, email, password_hash, first_name, last_name,\s
                        phone, user_type, created_at, updated_at
                 FROM users WHERE username = ?
-                """;
+               \s""";
         
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, userRowMapper, username));
@@ -161,14 +175,20 @@ public class UserRepository implements GenericRepository<User, Integer> {
         }
     }
 
+    /**
+     * Find by email optional.
+     *
+     * @param email the email
+     * @return the optional
+     */
     public Optional<User> findByEmail(String email) {
         if (email == null) return Optional.empty();
         
         String sql = """
-                SELECT user_id, username, email, password_hash, first_name, last_name, 
+                SELECT user_id, username, email, password_hash, first_name, last_name,\s
                        phone, user_type, created_at, updated_at
                 FROM users WHERE email = ?
-                """;
+               \s""";
         
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, userRowMapper, email));
@@ -177,6 +197,13 @@ public class UserRepository implements GenericRepository<User, Integer> {
         }
     }
 
+    /**
+     * Authenticate optional.
+     *
+     * @param username the username
+     * @param password the password
+     * @return the optional
+     */
     public Optional<User> authenticate(String username, String password) {
         if (username == null || password == null) return Optional.empty();
         
@@ -188,6 +215,12 @@ public class UserRepository implements GenericRepository<User, Integer> {
         return passwordMatches ? Optional.of(user) : Optional.empty();
     }
 
+    /**
+     * Email exists boolean.
+     *
+     * @param email the email
+     * @return the boolean
+     */
     public boolean emailExists(String email) {
         if (email == null) return false;
         String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
@@ -195,6 +228,12 @@ public class UserRepository implements GenericRepository<User, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Username exists boolean.
+     *
+     * @param username the username
+     * @return the boolean
+     */
     public boolean usernameExists(String username) {
         if (username == null) return false;
         String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
@@ -202,22 +241,34 @@ public class UserRepository implements GenericRepository<User, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Find by user type list.
+     *
+     * @param userType the user type
+     * @return the list
+     */
     public List<User> findByUserType(UserType userType) {
         if (userType == null) return List.of();
         
         String sql = """
-                SELECT user_id, username, email, password_hash, first_name, last_name, 
+                SELECT user_id, username, email, password_hash, first_name, last_name,\s
                        phone, user_type, created_at, updated_at
                 FROM users WHERE user_type = ? ORDER BY username
-                """;
+               \s""";
         
         return jdbcTemplate.query(sql, userRowMapper, userType.toString().toLowerCase());
     }
 
-    @Transactional(readOnly = false)
-    public boolean changePassword(int userId, String newPassword) {
+    /**
+     * Change password.
+     *
+     * @param userId      the user id
+     * @param newPassword the new password
+     */
+    @Transactional()
+    public void changePassword(int userId, String newPassword) {
         String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
         String sql = "UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
-        return jdbcTemplate.update(sql, hashedPassword, userId) > 0;
+        jdbcTemplate.update(sql, hashedPassword, userId);
     }
 }

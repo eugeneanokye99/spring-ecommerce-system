@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The type Category service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
@@ -23,14 +26,20 @@ public class CategoryServiceImpl implements CategoryService {
     
     private final CategoryRepository categoryRepository;
     private final ProductService productService;
-    
+
+    /**
+     * Instantiates a new Category service.
+     *
+     * @param categoryRepository the category repository
+     * @param productService     the product service
+     */
     public CategoryServiceImpl(CategoryRepository categoryRepository, ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.productService = productService;
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Category createCategory(Category category) {
         logger.info("Creating new category: {}", category.getCategoryName());
         
@@ -81,7 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Category updateCategory(Category category) {
         logger.info("Updating category ID: {}", category.getCategoryId());
         
@@ -105,7 +114,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteCategory(Integer categoryId) {
         logger.info("Deleting category ID: {}", categoryId);
         
@@ -128,7 +137,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Category moveCategory(Integer categoryId, Integer newParentId) {
         logger.info("Moving category {} to parent {}", categoryId, newParentId);
         
