@@ -142,4 +142,11 @@ public class ReviewRepository implements GenericRepository<Review, Integer> {
         Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM reviews WHERE user_id = ?", Long.class, userId);
         return count != null ? count : 0L;
     }
+
+    public boolean hasUserReviewedProduct(int userId, int productId) {
+        Long count = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM reviews WHERE user_id = ? AND product_id = ?", 
+            Long.class, userId, productId);
+        return count != null && count > 0;
+    }
 }
