@@ -1,11 +1,9 @@
 package com.shopjoy.controller;
 
-import com.shopjoy.dto.mapper.UserMapper;
 import com.shopjoy.dto.request.CreateUserRequest;
 import com.shopjoy.dto.request.UpdateUserRequest;
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.UserResponse;
-import com.shopjoy.entity.User;
 import com.shopjoy.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,131 +15,133 @@ import java.util.List;
 /**
  * REST Controller for User management.
  * Base path: /api/v1/users
- * REFACTORED: Only calls methods that exist in UserService
+ * THIN CONTROLLER: Only handles HTTP concerns. All business logic and DTO↔Entity mapping done by services.
  */
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
-    
+
     private final UserService userService;
-    
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
-    
+
     /**
      * Create a new user (register).
-     * POST /api/v1/users
+     * POST /api/v1/users/register
+     * 
+     * @param request the user creation request (username, email, password, userType)
+     * @return created user with HTTP 201 status
      */
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> createUser(
+    public ResponseEntity<ApiResponse<UserResponse>> registerUser(
             @Valid @RequestBody CreateUserRequest request) {
-        
-        User user = UserMapper.toUser(request);
-        User createdUser = userService.registerUser(user);  // ← Service method exists
-        UserResponse response = UserMapper.toUserResponse(createdUser);
-        
+        UserResponse response = userService.registerUser(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(response, "User created successfully"));
+                .body(ApiResponse.success(response, "User registered successfully"));
     }
-    
+
     /**
      * Get user by ID.
      * GET /api/v1/users/{id}
+     * 
+     * @param id the user ID
+     * @return user details with HTTP 200 status
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable int id) {
-        
-        User user = userService.getUserById(id);  // ← Service method exists
-        UserResponse response = UserMapper.toUserResponse(user);
-        
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable Integer id) {
+        UserResponse response = userService.getUserById(id);
         return ResponseEntity.ok(ApiResponse.success(response, "User retrieved successfully"));
     }
-    
+
     /**
      * Get all users.
      * GET /api/v1/users
+     * 
+     * @return list of all users with HTTP 200 status
      */
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
-        
-        List<User> users = userService.getAllUsers();  // ← Service method exists
-        List<UserResponse> userResponses = UserMapper.toUserResponseList(users);
-        
-        return ResponseEntity.ok(ApiResponse.success(userResponses, "Users retrieved successfully"));
+        List<UserResponse> response = userService.getAllUsers();
+        return ResponseEntity.ok(ApiResponse.success(response, "Users retrieved successfully"));
     }
-    
+
     /**
-     * Update user.
+     * Update user profile.
      * PUT /api/v1/users/{id}
+     * 
+     * @param id the user ID
+     * @param request the update request (username, email, firstName, lastName, phone, profileImageUrl)
+     * @return updated user details with HTTP 200 status
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserResponse>> updateUser(
-            @PathVariable int id,
+    public ResponseEntity<ApiResponse<UserResponse>> updateUserProfile(
+            @PathVariable Integer id,
             @Valid @RequestBody UpdateUserRequest request) {
-        
-        User existingUser = userService.getUserById(id);  // ← Service method exists
-        UserMapper.updateUserFromRequest(existingUser, request);
-        User updatedUser = userService.updateUserProfile(existingUser);  // ← Service method exists
-        UserResponse response = UserMapper.toUserResponse(updatedUser);
-        
-        return ResponseEntity.ok(ApiResponse.success(response, "User updated successfully"));
+        UserResponse response = userService.updateUserProfile(id, request);
+        return ResponseEntity.ok(ApiResponse.success(response, "User profile updated successfully"));
     }
-    
+
     /**
      * Delete user.
      * DELETE /api/v1/users/{id}
+     * 
+     * @param id the user ID
+     * @return success message with HTTP 200 status
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable int id) {
-        
-        userService.deleteUser(id);  // ← Service method exists
-        
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable Integer id) {
+        userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"));
     }
-    
-    // ==================== CUSTOM ENDPOINTS ====================
-    
+
     /**
      * Find user by email.
      * GET /api/v1/users/email/{email}
+     * 
+     * @param email the email address
+     * @return user details with HTTP 200 status
      */
     @GetMapping("/email/{email}")
     public ResponseEntity<ApiResponse<UserResponse>> getUserByEmail(@PathVariable String email) {
-        
-        User user = userService.getUserByEmail(email)  // ← Service method exists (returns Optional)
+        UserResponse response = userService.getUserByEmail(email)
                 .orElseThrow(() -> new com.shopjoy.exception.ResourceNotFoundException(
-                        "User not found with email: " + email));
-        UserResponse response = UserMapper.toUserResponse(user);
-        
+                        "User", "email", email));
         return ResponseEntity.ok(ApiResponse.success(response, "User found by email"));
     }
-    
+
+    /**
+     * Authenticate user (login).
+     * POST /api/v1/users/authenticate
+     * 
+     * @param request the authentication request (username, password)
+     * @return authenticated user details with HTTP 200 status
+     */
+    @PostMapping("/authenticate")
+    public ResponseEntity<ApiResponse<UserResponse>> authenticateUser(
+            @Valid @RequestBody java.util.Map<String, String> request) {
+        String username = request.get("username");
+        String password = request.get("password");
+        UserResponse response = userService.authenticateUser(username, password);
+        return ResponseEntity.ok(ApiResponse.success(response, "User authenticated successfully"));
+    }
+
     /**
      * Change user password.
      * PUT /api/v1/users/{id}/password
-     * Request body: { "oldPassword": "current", "newPassword": "newSecret123" }
+     * 
+     * @param id the user ID
+     * @param request the password change request (oldPassword, newPassword)
+     * @return success message with HTTP 200 status
      */
     @PutMapping("/{id}/password")
     public ResponseEntity<ApiResponse<Void>> changePassword(
-            @PathVariable int id,
-            @RequestBody java.util.Map<String, String> passwordRequest) {
-        
-        String oldPassword = passwordRequest.get("oldPassword");
-        String newPassword = passwordRequest.get("newPassword");
-        
-        if (oldPassword == null || oldPassword.isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("Old password is required"));
-        }
-        
-        if (newPassword == null || newPassword.length() < 8) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponse.error("New password must be at least 8 characters"));
-        }
-        
-        userService.changePassword(id, oldPassword, newPassword);  // ← Service method exists
-        
+            @PathVariable Integer id,
+            @Valid @RequestBody java.util.Map<String, String> request) {
+        String oldPassword = request.get("oldPassword");
+        String newPassword = request.get("newPassword");
+        userService.changePassword(id, oldPassword, newPassword);
         return ResponseEntity.ok(ApiResponse.success(null, "Password changed successfully"));
     }
 }

@@ -1,6 +1,8 @@
 package com.shopjoy.service;
 
-import com.shopjoy.entity.User;
+import com.shopjoy.dto.request.CreateUserRequest;
+import com.shopjoy.dto.request.UpdateUserRequest;
+import com.shopjoy.dto.response.UserResponse;
 import com.shopjoy.entity.UserType;
 import com.shopjoy.exception.*;
 
@@ -10,6 +12,9 @@ import java.util.Optional;
 /**
  * Service interface for User-related business operations.
  * Handles user registration, authentication, profile management, and user queries.
+ * 
+ * DTO-FIRST DESIGN: All methods accept and return DTOs.
+ * Mapping between DTOs and entities is handled internally by the service implementation.
  */
 public interface UserService {
     
@@ -18,75 +23,76 @@ public interface UserService {
      * Validates that username and email are unique before creating the account.
      * Hashes the password before storing it.
      * 
-     * @param user the user to register (password should be plain text)
-     * @return the created user with generated ID and hashed password
+     * @param request the user registration request DTO
+     * @return the created user response DTO
      * @throws DuplicateResourceException if username or email already exists
      * @throws ValidationException if user data is invalid
      */
-    User registerUser(User user);
+    UserResponse registerUser(CreateUserRequest request);
     
     /**
      * Authenticates a user with username and plain text password.
      * 
      * @param username the username
      * @param password the plain text password
-     * @return the authenticated user
+     * @return the authenticated user response DTO
      * @throws AuthenticationException if credentials are invalid
      */
-    User authenticateUser(String username, String password);
+    UserResponse authenticateUser(String username, String password);
     
     /**
      * Retrieves a user by their ID.
      * 
      * @param userId the user ID
-     * @return the user
+     * @return the user response DTO
      * @throws ResourceNotFoundException if user not found
      */
-    User getUserById(Integer userId);
+    UserResponse getUserById(Integer userId);
     
     /**
      * Retrieves a user by their email address.
      * 
      * @param email the email address
-     * @return Optional containing the user if found
+     * @return Optional containing the user response DTO if found
      */
-    Optional<User> getUserByEmail(String email);
+    Optional<UserResponse> getUserByEmail(String email);
     
     /**
      * Retrieves a user by their username.
      * 
      * @param username the username
-     * @return Optional containing the user if found
+     * @return Optional containing the user response DTO if found
      */
-    Optional<User> getUserByUsername(String username);
+    Optional<UserResponse> getUserByUsername(String username);
     
     /**
      * Retrieves all users in the system.
      * 
-     * @return list of all users
+     * @return list of all user response DTOs
      */
-    List<User> getAllUsers();
+    List<UserResponse> getAllUsers();
     
     /**
      * Retrieves all users of a specific type.
      * 
      * @param userType the user type (CUSTOMER or ADMIN)
-     * @return list of users with the specified type
+     * @return list of user response DTOs with the specified type
      */
-    List<User> getUsersByType(UserType userType);
+    List<UserResponse> getUsersByType(UserType userType);
     
     /**
      * Updates an existing user's profile information.
      * Username and email uniqueness are validated if changed.
      * Password is not updated through this method.
      * 
-     * @param user the user with updated information
-     * @return the updated user
+     * @param userId the user ID
+     * @param request the update request DTO
+     * @return the updated user response DTO
      * @throws ResourceNotFoundException if user not found
      * @throws DuplicateResourceException if new username/email already exists
      * @throws ValidationException if user data is invalid
      */
-    User updateUserProfile(User user);
+    UserResponse updateUserProfile(Integer userId, UpdateUserRequest request);
     
     /**
      * Changes a user's password.

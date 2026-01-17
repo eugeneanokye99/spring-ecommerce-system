@@ -1,16 +1,18 @@
 package com.shopjoy.controller;
 
-import com.shopjoy.dto.mapper.InventoryMapper;
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.InventoryResponse;
-import com.shopjoy.entity.Inventory;
 import com.shopjoy.service.InventoryService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * REST Controller for Inventory management.
+ * Base path: /api/v1/inventory
+ * THIN CONTROLLER: Only handles HTTP concerns. All business logic and DTO↔Entity mapping done by services.
+ */
 @RestController
 @RequestMapping("/api/v1/inventory")
 public class InventoryController {
@@ -23,8 +25,7 @@ public class InventoryController {
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<ApiResponse<InventoryResponse>> getInventoryByProduct(@PathVariable Integer productId) {
-        Inventory inventory = inventoryService.getInventoryByProduct(productId);
-        InventoryResponse response = InventoryMapper.toInventoryResponse(inventory);
+        InventoryResponse response = inventoryService.getInventoryByProduct(productId);
         return ResponseEntity.ok(ApiResponse.success(response, "Inventory retrieved successfully"));
     }
 
@@ -46,8 +47,7 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<InventoryResponse>> updateStock(
             @PathVariable Integer productId,
             @RequestParam Integer newQuantity) {
-        Inventory updatedInventory = inventoryService.updateStock(productId, newQuantity);
-        InventoryResponse response = InventoryMapper.toInventoryResponse(updatedInventory);
+        InventoryResponse response = inventoryService.updateStock(productId, newQuantity);
         return ResponseEntity.ok(ApiResponse.success(response, "Stock updated successfully"));
     }
 
@@ -55,8 +55,7 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<InventoryResponse>> addStock(
             @PathVariable Integer productId,
             @RequestParam Integer quantity) {
-        Inventory updatedInventory = inventoryService.addStock(productId, quantity);
-        InventoryResponse response = InventoryMapper.toInventoryResponse(updatedInventory);
+        InventoryResponse response = inventoryService.addStock(productId, quantity);
         return ResponseEntity.ok(ApiResponse.success(response, "Stock added successfully"));
     }
 
@@ -64,8 +63,7 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<InventoryResponse>> removeStock(
             @PathVariable Integer productId,
             @RequestParam Integer quantity) {
-        Inventory updatedInventory = inventoryService.removeStock(productId, quantity);
-        InventoryResponse response = InventoryMapper.toInventoryResponse(updatedInventory);
+        InventoryResponse response = inventoryService.removeStock(productId, quantity);
         return ResponseEntity.ok(ApiResponse.success(response, "Stock removed successfully"));
     }
 
@@ -87,28 +85,21 @@ public class InventoryController {
 
     @GetMapping("/low-stock")
     public ResponseEntity<ApiResponse<List<InventoryResponse>>> getLowStockProducts() {
-        List<Inventory> inventories = inventoryService.getLowStockProducts();
-        List<InventoryResponse> responses = inventories.stream()
-                .map(InventoryMapper::toInventoryResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "Low stock products retrieved successfully"));
+        List<InventoryResponse> response = inventoryService.getLowStockProducts();
+        return ResponseEntity.ok(ApiResponse.success(response, "Low stock products retrieved successfully"));
     }
 
     @GetMapping("/out-of-stock")
     public ResponseEntity<ApiResponse<List<InventoryResponse>>> getOutOfStockProducts() {
-        List<Inventory> inventories = inventoryService.getOutOfStockProducts();
-        List<InventoryResponse> responses = inventories.stream()
-                .map(InventoryMapper::toInventoryResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "Out of stock products retrieved successfully"));
+        List<InventoryResponse> response = inventoryService.getOutOfStockProducts();
+        return ResponseEntity.ok(ApiResponse.success(response, "Out of stock products retrieved successfully"));
     }
 
     @PatchMapping("/product/{productId}/reorder-level")
     public ResponseEntity<ApiResponse<InventoryResponse>> updateReorderLevel(
             @PathVariable Integer productId,
             @RequestParam Integer reorderLevel) {
-        Inventory updatedInventory = inventoryService.updateReorderLevel(productId, reorderLevel);
-        InventoryResponse response = InventoryMapper.toInventoryResponse(updatedInventory);
+        InventoryResponse response = inventoryService.updateReorderLevel(productId, reorderLevel);
         return ResponseEntity.ok(ApiResponse.success(response, "Reorder level updated successfully"));
     }
 }

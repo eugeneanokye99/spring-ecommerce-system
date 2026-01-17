@@ -1,6 +1,8 @@
 package com.shopjoy.service;
 
-import com.shopjoy.entity.Review;
+import com.shopjoy.dto.request.CreateReviewRequest;
+import com.shopjoy.dto.request.UpdateReviewRequest;
+import com.shopjoy.dto.response.ReviewResponse;
 import com.shopjoy.exception.BusinessException;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -17,47 +19,47 @@ public interface ReviewService {
      * Creates a new product review.
      * Validates that user has purchased the product if verified purchase flag is set.
      * 
-     * @param review the review to create
-     * @return the created review with generated ID
+     * @param request the create review request
+     * @return the created review response
      * @throws ResourceNotFoundException if product or user not found
      * @throws ValidationException if review data is invalid
      * @throws BusinessException if user hasn't purchased the product
      */
-    Review createReview(Review review);
+    ReviewResponse createReview(CreateReviewRequest request);
     
     /**
      * Retrieves a review by its ID.
      * 
      * @param reviewId the review ID
-     * @return the review
+     * @return the review response
      * @throws ResourceNotFoundException if review not found
      */
-    Review getReviewById(Integer reviewId);
+    ReviewResponse getReviewById(Integer reviewId);
     
     /**
      * Retrieves all reviews for a product.
      * 
      * @param productId the product ID
-     * @return list of reviews
+     * @return list of review responses
      */
-    List<Review> getReviewsByProduct(Integer productId);
+    List<ReviewResponse> getReviewsByProduct(Integer productId);
     
     /**
      * Retrieves all reviews by a specific user.
      * 
      * @param userId the user ID
-     * @return list of reviews
+     * @return list of review responses
      */
-    List<Review> getReviewsByUser(Integer userId);
+    List<ReviewResponse> getReviewsByUser(Integer userId);
     
     /**
      * Retrieves reviews for a product filtered by rating.
      * 
      * @param productId the product ID
      * @param rating the rating (1-5)
-     * @return list of reviews with the specified rating
+     * @return list of review responses with the specified rating
      */
-    List<Review> getReviewsByRating(Integer productId, int rating);
+    List<ReviewResponse> getReviewsByRating(Integer productId, int rating);
     
     /**
      * Calculates the average rating for a product.
@@ -71,13 +73,14 @@ public interface ReviewService {
      * Updates an existing review.
      * Only the review author can update their review.
      * 
-     * @param review the review with updated information
-     * @return the updated review
+     * @param reviewId the review ID
+     * @param request the update review request
+     * @return the updated review response
      * @throws ResourceNotFoundException if review not found
      * @throws ValidationException if review data is invalid
      * @throws BusinessException if attempting to update someone else's review
      */
-    Review updateReview(Review review);
+    ReviewResponse updateReview(Integer reviewId, UpdateReviewRequest request);
     
     /**
      * Deletes a review.
@@ -91,8 +94,8 @@ public interface ReviewService {
      * Marks a review as helpful (increments helpful count).
      * 
      * @param reviewId the review ID
-     * @return the updated review
+     * @return the updated review response
      * @throws ResourceNotFoundException if review not found
      */
-    Review markReviewAsHelpful(Integer reviewId);
+    ReviewResponse markReviewAsHelpful(Integer reviewId);
 }

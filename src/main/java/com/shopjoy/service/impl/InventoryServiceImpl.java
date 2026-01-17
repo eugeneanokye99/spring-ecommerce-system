@@ -1,5 +1,7 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.InventoryMapper;
+import com.shopjoy.dto.response.InventoryResponse;
 import com.shopjoy.entity.Inventory;
 import com.shopjoy.exception.DuplicateResourceException;
 import com.shopjoy.exception.InsufficientStockException;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The type Inventory service.
@@ -38,8 +41,13 @@ public class InventoryServiceImpl implements InventoryService {
     
     @Override
     @Transactional()
-    public Inventory createInventory(Inventory inventory) {
-        logger.info("Creating inventory for product ID: {}", inventory.getProductId());
+    public InventoryResponse createInventory(Integer productId, int initialStock, int reorderLevel) {
+        logger.info("Creating inventory for product ID: {}", productId);
+        
+        Inventory inventory = new Inventory();
+        inventory.setProductId(productId);
+        inventory.setQuantityInStock(initialStock);
+        inventory.setReorderLevel(reorderLevel);
         
         validateInventoryData(inventory);
         
@@ -54,20 +62,21 @@ public class InventoryServiceImpl implements InventoryService {
         Inventory createdInventory = inventoryRepository.save(inventory);
         logger.info("Successfully created inventory with ID: {}", createdInventory.getInventoryId());
         
-        return createdInventory;
+        return InventoryMapper.toInventoryResponse(createdInventory);
     }
     
     @Override
-    public Inventory getInventoryByProduct(Integer productId) {
-        return inventoryRepository.findByProductId(productId)
+    public InventoryResponse getInventoryByProduct(Integer productId) {
+        Inventory inventory = inventoryRepository.findByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
+        return InventoryMapper.toInventoryResponse(inventory);
     }
     
     @Override
     public boolean isProductInStock(Integer productId) {
         try {
-            Inventory inventory = getInventoryByProduct(productId);
-            return inventory.getQuantityInStock() > 0;
+            Optional<Inventory> inventory = inventoryRepository.findByProductId(productId);
+            return inventory.isPresent() && inventory.get().getQuantityInStock() > 0;
         } catch (ResourceNotFoundException e) {
             return false;
         }
@@ -76,8 +85,8 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public boolean hasAvailableStock(Integer productId, int quantity) {
         try {
-            Inventory inventory = getInventoryByProduct(productId);
-            return inventory.getQuantityInStock() >= quantity;
+            Optional<Inventory> inventory = inventoryRepository.findByProductId(productId);
+            return inventory.isPresent() && inventory.get().getQuantityInStock() >= quantity;
         } catch (ResourceNotFoundException e) {
             return false;
         }
@@ -85,14 +94,15 @@ public class InventoryServiceImpl implements InventoryService {
     
     @Override
     @Transactional()
-    public Inventory updateStock(Integer productId, int newQuantity) {
+    public InventoryResponse updateStock(Integer productId, int newQuantity) {
         logger.info("Updating stock for product ID: {} to {}", productId, newQuantity);
         
         if (newQuantity < 0) {
             throw new ValidationException("quantityInStock", "cannot be negative");
         }
         
-        Inventory inventory = getInventoryByProduct(productId);
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
         
         inventoryRepository.updateStock(productId, newQuantity);
         
@@ -100,19 +110,20 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setUpdatedAt(LocalDateTime.now());
         
         logger.info("Successfully updated stock for product ID: {}", productId);
-        return inventory;
+        return InventoryMapper.toInventoryResponse(inventory);
     }
     
     @Override
     @Transactional()
-    public Inventory addStock(Integer productId, int quantity) {
+    public InventoryResponse addStock(Integer productId, int quantity) {
         logger.info("Adding {} units to product ID: {}", quantity, productId);
         
         if (quantity <= 0) {
             throw new ValidationException("quantity", "must be positive");
         }
         
-        Inventory inventory = getInventoryByProduct(productId);
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
         
         inventoryRepository.incrementStock(productId, quantity);
         
@@ -121,19 +132,20 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setUpdatedAt(LocalDateTime.now());
         
         logger.info("Successfully added {} units to product ID: {}", quantity, productId);
-        return inventory;
+        return InventoryMapper.toInventoryResponse(inventory);
     }
     
     @Override
     @Transactional()
-    public Inventory removeStock(Integer productId, int quantity) {
+    public InventoryResponse removeStock(Integer productId, int quantity) {
         logger.info("Removing {} units from product ID: {}", quantity, productId);
         
         if (quantity <= 0) {
             throw new ValidationException("quantity", "must be positive");
         }
         
-        Inventory inventory = getInventoryByProduct(productId);
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
         
         if (inventory.getQuantityInStock() < quantity) {
             throw new InsufficientStockException(
@@ -148,7 +160,7 @@ public class InventoryServiceImpl implements InventoryService {
         inventory.setUpdatedAt(LocalDateTime.now());
         
         logger.info("Successfully removed {} units from product ID: {}", quantity, productId);
-        return inventory;
+        return InventoryMapper.toInventoryResponse(inventory);
     }
     
     @Override
@@ -160,7 +172,8 @@ public class InventoryServiceImpl implements InventoryService {
             throw new ValidationException("quantity", "must be positive");
         }
         
-        Inventory inventory = getInventoryByProduct(productId);
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
         
         if (inventory.getQuantityInStock() < quantity) {
             throw new InsufficientStockException(
@@ -187,34 +200,38 @@ public class InventoryServiceImpl implements InventoryService {
     }
     
     @Override
-    public List<Inventory> getLowStockProducts() {
-        return inventoryRepository.findLowStock();
+    public List<InventoryResponse> getLowStockProducts() {
+        return inventoryRepository.findLowStock().stream()
+                .map(InventoryMapper::toInventoryResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Inventory> getOutOfStockProducts() {
+    public List<InventoryResponse> getOutOfStockProducts() {
         return inventoryRepository.findAll().stream()
                 .filter(inventory -> inventory.getQuantityInStock() == 0)
+                .map(InventoryMapper::toInventoryResponse)
                 .toList();
     }
     
     @Override
     @Transactional()
-    public Inventory updateReorderLevel(Integer productId, int reorderLevel) {
+    public InventoryResponse updateReorderLevel(Integer productId, int reorderLevel) {
         logger.info("Updating reorder level for product ID: {} to {}", productId, reorderLevel);
         
         if (reorderLevel < 0) {
             throw new ValidationException("reorderLevel", "cannot be negative");
         }
         
-        Inventory inventory = getInventoryByProduct(productId);
+        Inventory inventory = inventoryRepository.findByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory", "productId", productId));
         inventory.setReorderLevel(reorderLevel);
         inventory.setUpdatedAt(LocalDateTime.now());
         
         Inventory updatedInventory = inventoryRepository.update(inventory);
         logger.info("Successfully updated reorder level for product ID: {}", productId);
         
-        return updatedInventory;
+        return InventoryMapper.toInventoryResponse(updatedInventory);
     }
     
     private void validateInventoryData(Inventory inventory) {

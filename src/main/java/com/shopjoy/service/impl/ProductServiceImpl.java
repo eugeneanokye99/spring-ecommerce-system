@@ -1,5 +1,9 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.ProductMapper;
+import com.shopjoy.dto.request.CreateProductRequest;
+import com.shopjoy.dto.request.UpdateProductRequest;
+import com.shopjoy.dto.response.ProductResponse;
 import com.shopjoy.entity.Product;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -36,125 +40,140 @@ public class ProductServiceImpl implements ProductService {
     
     @Override
     @Transactional()
-    public Product createProduct(Product product) {
-        logger.info("Creating new product: {}", product.getProductName());
+    public ProductResponse createProduct(CreateProductRequest request) {
+        logger.info("Creating new product: {}", request.getProductName());
         
-        validateProductData(product);
-        
+        Product product = ProductMapper.toProduct(request);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         product.setActive(true);
         
+        validateProductData(product);
+        
         Product createdProduct = productRepository.save(product);
         logger.info("Successfully created product with ID: {}", createdProduct.getProductId());
         
-        return createdProduct;
+        return ProductMapper.toProductResponse(createdProduct);
     }
     
     @Override
-    public Product getProductById(Integer productId) {
-        return productRepository.findById(productId)
+    public ProductResponse getProductById(Integer productId) {
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
+        return ProductMapper.toProductResponse(product);
     }
     
     @Override
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
-    }
-    
-    @Override
-    public List<Product> getActiveProducts() {
+    public List<ProductResponse> getAllProducts() {
         return productRepository.findAll().stream()
-                .filter(Product::isActive)
+                .map(ProductMapper::toProductResponse)
                 .collect(Collectors.toList());
     }
     
     @Override
-    public List<Product> getProductsByCategory(Integer categoryId) {
+    public List<ProductResponse> getActiveProducts() {
+        return productRepository.findAll().stream()
+                .filter(Product::isActive)
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<ProductResponse> getProductsByCategory(Integer categoryId) {
         if (categoryId == null) {
             throw new ValidationException("Category ID cannot be null");
         }
-        return productRepository.findByCategoryId(categoryId);
+        return productRepository.findByCategoryId(categoryId).stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Product> searchProductsByName(String keyword) {
+    public List<ProductResponse> searchProductsByName(String keyword) {
         if (keyword == null || keyword.trim().isEmpty()) {
             throw new ValidationException("Search keyword cannot be empty");
         }
-        return productRepository.findByNameContaining(keyword);
+        return productRepository.findByNameContaining(keyword).stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Product> getProductsByPriceRange(double minPrice, double maxPrice) {
+    public List<ProductResponse> getProductsByPriceRange(double minPrice, double maxPrice) {
         if (minPrice < 0) {
             throw new ValidationException("Minimum price cannot be negative");
         }
         if (maxPrice < minPrice) {
             throw new ValidationException("Maximum price must be greater than or equal to minimum price");
         }
-        return productRepository.findByPriceRange(minPrice, maxPrice);
+        return productRepository.findByPriceRange(minPrice, maxPrice).stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
     @Transactional()
-    public Product updateProduct(Product product) {
-        logger.info("Updating product ID: {}", product.getProductId());
+    public ProductResponse updateProduct(Integer productId, UpdateProductRequest request) {
+        logger.info("Updating product ID: {}", productId);
         
-        Product existingProduct = getProductById(product.getProductId());
+        Product existingProduct = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         
-        validateProductData(product);
+        ProductMapper.updateProductFromRequest(existingProduct, request);
+        existingProduct.setUpdatedAt(LocalDateTime.now());
         
-        product.setCreatedAt(existingProduct.getCreatedAt());
-        product.setUpdatedAt(LocalDateTime.now());
+        validateProductData(existingProduct);
         
-        Product updatedProduct = productRepository.update(product);
-        logger.info("Successfully updated product ID: {}", product.getProductId());
+        Product updatedProduct = productRepository.update(existingProduct);
+        logger.info("Successfully updated product ID: {}", productId);
         
-        return updatedProduct;
+        return ProductMapper.toProductResponse(updatedProduct);
     }
     
     @Override
     @Transactional()
-    public Product updateProductPrice(Integer productId, double newPrice) {
+    public ProductResponse updateProductPrice(Integer productId, double newPrice) {
         logger.info("Updating price for product ID: {} to {}", productId, newPrice);
         
         if (newPrice < 0) {
             throw new ValidationException("price", "must not be negative");
         }
         
-        Product product = getProductById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         product.setPrice(newPrice);
         product.setUpdatedAt(LocalDateTime.now());
         
         Product updatedProduct = productRepository.update(product);
         logger.info("Successfully updated price for product ID: {}", productId);
         
-        return updatedProduct;
+        return ProductMapper.toProductResponse(updatedProduct);
     }
     
     @Override
     @Transactional()
-    public Product activateProduct(Integer productId) {
+    public ProductResponse activateProduct(Integer productId) {
         logger.info("Activating product ID: {}", productId);
         
-        Product product = getProductById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         product.setActive(true);
         product.setUpdatedAt(LocalDateTime.now());
         
-        return productRepository.update(product);
+        return ProductMapper.toProductResponse(productRepository.update(product));
     }
     
     @Override
     @Transactional()
-    public Product deactivateProduct(Integer productId) {
+    public ProductResponse deactivateProduct(Integer productId) {
         logger.info("Deactivating product ID: {}", productId);
         
-        Product product = getProductById(productId);
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", "id", productId));
         product.setActive(false);
         product.setUpdatedAt(LocalDateTime.now());
         
-        return productRepository.update(product);
+        return ProductMapper.toProductResponse(productRepository.update(product));
     }
     
     @Override

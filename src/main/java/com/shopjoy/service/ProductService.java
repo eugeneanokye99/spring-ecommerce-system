@@ -1,6 +1,8 @@
 package com.shopjoy.service;
 
-import com.shopjoy.entity.Product;
+import com.shopjoy.dto.request.CreateProductRequest;
+import com.shopjoy.dto.request.UpdateProductRequest;
+import com.shopjoy.dto.response.ProductResponse;
 import com.shopjoy.exception.DuplicateResourceException;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -9,118 +11,104 @@ import java.util.List;
 
 /**
  * Service interface for Product-related business operations.
- * Handles product CRUD operations, search, and business validations.
+ * DTO-FIRST DESIGN: All methods accept and return DTOs, not entities.
+ * Service layer handles all DTO ↔ Entity mapping internally.
  */
 public interface ProductService {
     
     /**
      * Creates a new product in the catalog.
-     * Validates product data and ensures SKU uniqueness if provided.
      * 
-     * @param product the product to create
-     * @return the created product with generated ID
-     * @throws ValidationException if product data is invalid
-     * @throws DuplicateResourceException if SKU already exists
+     * @param request the product creation request DTO
+     * @return the created product response DTO
      */
-    Product createProduct(Product product);
+    ProductResponse createProduct(CreateProductRequest request);
     
     /**
      * Retrieves a product by its ID.
      * 
      * @param productId the product ID
-     * @return the product
-     * @throws ResourceNotFoundException if product not found
+     * @return the product response DTO
      */
-    Product getProductById(Integer productId);
+    ProductResponse getProductById(Integer productId);
     
     /**
      * Retrieves all products in the catalog.
      * 
-     * @return list of all products
+     * @return list of all product response DTOs
      */
-    List<Product> getAllProducts();
+    List<ProductResponse> getAllProducts();
     
     /**
      * Retrieves all active products (available for sale).
      * 
-     * @return list of active products
+     * @return list of active product response DTOs
      */
-    List<Product> getActiveProducts();
+    List<ProductResponse> getActiveProducts();
     
     /**
      * Retrieves all products in a specific category.
      * 
      * @param categoryId the category ID
-     * @return list of products in the category
+     * @return list of product response DTOs in the category
      */
-    List<Product> getProductsByCategory(Integer categoryId);
+    List<ProductResponse> getProductsByCategory(Integer categoryId);
     
     /**
      * Searches for products by name (case-insensitive partial match).
      * 
      * @param keyword the search keyword
-     * @return list of matching products
+     * @return list of matching product response DTOs
      */
-    List<Product> searchProductsByName(String keyword);
+    List<ProductResponse> searchProductsByName(String keyword);
     
     /**
      * Finds products within a price range.
      * 
      * @param minPrice minimum price (inclusive)
      * @param maxPrice maximum price (inclusive)
-     * @return list of products within the price range
-     * @throws ValidationException if price range is invalid
+     * @return list of product response DTOs within the price range
      */
-    List<Product> getProductsByPriceRange(double minPrice, double maxPrice);
+    List<ProductResponse> getProductsByPriceRange(double minPrice, double maxPrice);
     
     /**
      * Updates an existing product's information.
-     * Validates product data and price changes.
      * 
-     * @param product the product with updated information
-     * @return the updated product
-     * @throws ResourceNotFoundException if product not found
-     * @throws ValidationException if product data is invalid
+     * @param productId the product ID
+     * @param request the update product request DTO
+     * @return the updated product response DTO
      */
-    Product updateProduct(Product product);
+    ProductResponse updateProduct(Integer productId, UpdateProductRequest request);
     
     /**
      * Updates a product's price.
-     * Validates that the new price is positive.
      * 
      * @param productId the product ID
      * @param newPrice the new price
-     * @return the updated product
-     * @throws ResourceNotFoundException if product not found
-     * @throws ValidationException if price is invalid
+     * @return the updated product response DTO
      */
-    Product updateProductPrice(Integer productId, double newPrice);
+    ProductResponse updateProductPrice(Integer productId, double newPrice);
     
     /**
      * Activates a product (makes it available for sale).
      * 
      * @param productId the product ID
-     * @return the updated product
-     * @throws ResourceNotFoundException if product not found
+     * @return the updated product response DTO
      */
-    Product activateProduct(Integer productId);
+    ProductResponse activateProduct(Integer productId);
     
     /**
      * Deactivates a product (removes from sale, but keeps in catalog).
      * 
      * @param productId the product ID
-     * @return the updated product
-     * @throws ResourceNotFoundException if product not found
+     * @return the updated product response DTO
      */
-    Product deactivateProduct(Integer productId);
+    ProductResponse deactivateProduct(Integer productId);
     
     /**
      * Deletes a product from the catalog.
-     * Should check for dependencies (orders, inventory) before deletion.
      * 
      * @param productId the product ID
-     * @throws ResourceNotFoundException if product not found
-     * @throws BusinessException if product has dependencies
      */
     void deleteProduct(Integer productId);
     

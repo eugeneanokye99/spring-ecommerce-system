@@ -1,11 +1,9 @@
 package com.shopjoy.controller;
 
-import com.shopjoy.dto.mapper.ReviewMapper;
 import com.shopjoy.dto.request.CreateReviewRequest;
 import com.shopjoy.dto.request.UpdateReviewRequest;
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.ReviewResponse;
-import com.shopjoy.entity.Review;
 import com.shopjoy.service.ReviewService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -13,8 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * REST Controller for Product Review management.
+ * Base path: /api/v1/reviews
+ * THIN CONTROLLER: Only handles HTTP concerns. All business logic and DTO↔Entity mapping done by services.
+ */
 @RestController
 @RequestMapping("/api/v1/reviews")
 public class ReviewController {
@@ -26,48 +28,37 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReviewResponse>> createReview(@Valid @RequestBody CreateReviewRequest request) {
-        Review review = ReviewMapper.toReview(request);
-        Review createdReview = reviewService.createReview(review);
-        ReviewResponse response = ReviewMapper.toReviewResponse(createdReview);
+    public ResponseEntity<ApiResponse<ReviewResponse>> createReview(
+            @Valid @RequestBody CreateReviewRequest request) {
+        ReviewResponse response = reviewService.createReview(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Review created successfully"));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ReviewResponse>> getReviewById(@PathVariable Integer id) {
-        Review review = reviewService.getReviewById(id);
-        ReviewResponse response = ReviewMapper.toReviewResponse(review);
+        ReviewResponse response = reviewService.getReviewById(id);
         return ResponseEntity.ok(ApiResponse.success(response, "Review retrieved successfully"));
     }
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsByProduct(@PathVariable Integer productId) {
-        List<Review> reviews = reviewService.getReviewsByProduct(productId);
-        List<ReviewResponse> responses = reviews.stream()
-                .map(ReviewMapper::toReviewResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "Product reviews retrieved successfully"));
+        List<ReviewResponse> response = reviewService.getReviewsByProduct(productId);
+        return ResponseEntity.ok(ApiResponse.success(response, "Product reviews retrieved successfully"));
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsByUser(@PathVariable Integer userId) {
-        List<Review> reviews = reviewService.getReviewsByUser(userId);
-        List<ReviewResponse> responses = reviews.stream()
-                .map(ReviewMapper::toReviewResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "User reviews retrieved successfully"));
+        List<ReviewResponse> response = reviewService.getReviewsByUser(userId);
+        return ResponseEntity.ok(ApiResponse.success(response, "User reviews retrieved successfully"));
     }
 
     @GetMapping("/product/{productId}/rating/{rating}")
     public ResponseEntity<ApiResponse<List<ReviewResponse>>> getReviewsByRating(
             @PathVariable Integer productId,
             @PathVariable Integer rating) {
-        List<Review> reviews = reviewService.getReviewsByRating(productId, rating);
-        List<ReviewResponse> responses = reviews.stream()
-                .map(ReviewMapper::toReviewResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "Reviews by rating retrieved successfully"));
+        List<ReviewResponse> response = reviewService.getReviewsByRating(productId, rating);
+        return ResponseEntity.ok(ApiResponse.success(response, "Reviews by rating retrieved successfully"));
     }
 
     @GetMapping("/product/{productId}/average-rating")
@@ -80,10 +71,7 @@ public class ReviewController {
     public ResponseEntity<ApiResponse<ReviewResponse>> updateReview(
             @PathVariable Integer id,
             @Valid @RequestBody UpdateReviewRequest request) {
-        Review review = reviewService.getReviewById(id);
-        ReviewMapper.updateReviewFromRequest(review, request);
-        Review updatedReview = reviewService.updateReview(review);
-        ReviewResponse response = ReviewMapper.toReviewResponse(updatedReview);
+        ReviewResponse response = reviewService.updateReview(id, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Review updated successfully"));
     }
 

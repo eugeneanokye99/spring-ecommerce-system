@@ -1,10 +1,8 @@
 package com.shopjoy.controller;
 
-import com.shopjoy.dto.mapper.CartItemMapper;
 import com.shopjoy.dto.request.AddToCartRequest;
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.CartItemResponse;
-import com.shopjoy.entity.CartItem;
 import com.shopjoy.service.CartService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -12,8 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * REST Controller for Shopping Cart management.
+ * Base path: /api/v1/cart
+ * THIN CONTROLLER: Only handles HTTP concerns. All business logic and DTO↔Entity mapping done by services.
+ */
 @RestController
 @RequestMapping("/api/v1/cart")
 public class CartController {
@@ -25,13 +27,9 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<ApiResponse<CartItemResponse>> addToCart(@Valid @RequestBody AddToCartRequest request) {
-        CartItem cartItem = cartService.addToCart(
-                request.getUserId(),
-                request.getProductId(),
-                request.getQuantity()
-        );
-        CartItemResponse response = CartItemMapper.toCartItemResponse(cartItem);
+    public ResponseEntity<ApiResponse<CartItemResponse>> addToCart(
+            @Valid @RequestBody AddToCartRequest request) {
+        CartItemResponse response = cartService.addToCart(request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(response, "Item added to cart successfully"));
     }
@@ -40,8 +38,7 @@ public class CartController {
     public ResponseEntity<ApiResponse<CartItemResponse>> updateCartItemQuantity(
             @PathVariable Integer cartItemId,
             @RequestParam Integer quantity) {
-        CartItem updatedItem = cartService.updateCartItemQuantity(cartItemId, quantity);
-        CartItemResponse response = CartItemMapper.toCartItemResponse(updatedItem);
+        CartItemResponse response = cartService.updateCartItemQuantity(cartItemId, quantity);
         return ResponseEntity.ok(ApiResponse.success(response, "Cart item quantity updated successfully"));
     }
 
@@ -53,11 +50,8 @@ public class CartController {
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<CartItemResponse>>> getCartItems(@PathVariable Integer userId) {
-        List<CartItem> cartItems = cartService.getCartItems(userId);
-        List<CartItemResponse> responses = cartItems.stream()
-                .map(CartItemMapper::toCartItemResponse)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success(responses, "Cart items retrieved successfully"));
+        List<CartItemResponse> response = cartService.getCartItems(userId);
+        return ResponseEntity.ok(ApiResponse.success(response, "Cart items retrieved successfully"));
     }
 
     @DeleteMapping("/user/{userId}")

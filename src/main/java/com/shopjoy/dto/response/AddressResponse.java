@@ -1,7 +1,9 @@
 package com.shopjoy.dto.response;
 
 import com.shopjoy.entity.AddressType;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
  */
 @Setter
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class AddressResponse {
     
     private int addressId;

@@ -1,5 +1,9 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.UserMapper;
+import com.shopjoy.dto.request.CreateUserRequest;
+import com.shopjoy.dto.request.UpdateUserRequest;
+import com.shopjoy.dto.response.UserResponse;
 import com.shopjoy.entity.User;
 import com.shopjoy.entity.UserType;
 import com.shopjoy.exception.AuthenticationException;
@@ -17,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The type User service.
@@ -40,32 +45,33 @@ public class UserServiceImpl implements UserService {
     
     @Override
     @Transactional()
-    public User registerUser(User user) {
-        logger.info("Attempting to register new user with username: {}", user.getUsername());
+    public UserResponse registerUser(CreateUserRequest request) {
+        logger.info("Attempting to register new user with username: {}", request.getUsername());
         
-        validateUserData(user);
+        validateCreateUserRequest(request);
         
-        if (userRepository.usernameExists(user.getUsername())) {
-            logger.warn("Registration failed: Username already exists: {}", user.getUsername());
-            throw new DuplicateResourceException("User", "username", user.getUsername());
+        if (userRepository.usernameExists(request.getUsername())) {
+            logger.warn("Registration failed: Username already exists: {}", request.getUsername());
+            throw new DuplicateResourceException("User", "username", request.getUsername());
         }
         
-        if (userRepository.emailExists(user.getEmail())) {
-            logger.warn("Registration failed: Email already exists: {}", user.getEmail());
-            throw new DuplicateResourceException("User", "email", user.getEmail());
+        if (userRepository.emailExists(request.getEmail())) {
+            logger.warn("Registration failed: Email already exists: {}", request.getEmail());
+            throw new DuplicateResourceException("User", "email", request.getEmail());
         }
         
+        User user = UserMapper.toUser(request);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         
         User createdUser = userRepository.save(user);
         logger.info("Successfully registered user with ID: {}", createdUser.getUserId());
         
-        return createdUser;
+        return UserMapper.toUserResponse(createdUser);
     }
     
     @Override
-    public User authenticateUser(String username, String password) {
+    public UserResponse authenticateUser(String username, String password) {
         logger.info("Authentication attempt for username: {}", username);
         
         if (username == null || username.trim().isEmpty()) {
@@ -84,67 +90,69 @@ public class UserServiceImpl implements UserService {
         }
         
         logger.info("Successfully authenticated user: {}", username);
-        return userOpt.get();
+        return UserMapper.toUserResponse(userOpt.get());
     }
     
     @Override
-    public User getUserById(Integer userId) {
-        return userRepository.findById(userId)
+    public UserResponse getUserById(Integer userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        return UserMapper.toUserResponse(user);
     }
     
     @Override
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<UserResponse> getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .map(UserMapper::toUserResponse);
     }
     
     @Override
-    public Optional<User> getUserByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public Optional<UserResponse> getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(UserMapper::toUserResponse);
     }
     
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(UserMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<User> getUsersByType(UserType userType) {
+    public List<UserResponse> getUsersByType(UserType userType) {
         if (userType == null) {
             throw new ValidationException("User type cannot be null");
         }
-        return userRepository.findByUserType(userType);
+        return userRepository.findByUserType(userType).stream()
+                .map(UserMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
     @Transactional()
-    public User updateUserProfile(User user) {
-        logger.info("Updating profile for user ID: {}", user.getUserId());
+    public UserResponse updateUserProfile(Integer userId, UpdateUserRequest request) {
+        logger.info("Updating profile for user ID: {}", userId);
         
-        User existingUser = getUserById(user.getUserId());
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         
-        validateUserData(user);
+        validateUpdateUserRequest(request);
         
-        if (!existingUser.getUsername().equals(user.getUsername())) {
-            if (userRepository.usernameExists(user.getUsername())) {
-                throw new DuplicateResourceException("User", "username", user.getUsername());
+        if (request.getEmail() != null && !existingUser.getEmail().equals(request.getEmail())) {
+            if (userRepository.emailExists(request.getEmail())) {
+                throw new DuplicateResourceException("User", "email", request.getEmail());
             }
         }
         
-        if (!existingUser.getEmail().equals(user.getEmail())) {
-            if (userRepository.emailExists(user.getEmail())) {
-                throw new DuplicateResourceException("User", "email", user.getEmail());
-            }
-        }
+        // Apply updates
+        UserMapper.updateUserFromRequest(existingUser, request);
+        existingUser.setUpdatedAt(LocalDateTime.now());
         
-        user.setPasswordHash(existingUser.getPasswordHash());
-        user.setCreatedAt(existingUser.getCreatedAt());
-        user.setUpdatedAt(LocalDateTime.now());
+        User updatedUser = userRepository.update(existingUser);
+        logger.info("Successfully updated user profile for ID: {}", userId);
         
-        User updatedUser = userRepository.update(user);
-        logger.info("Successfully updated user profile for ID: {}", user.getUserId());
-        
-        return updatedUser;
+        return UserMapper.toUserResponse(updatedUser);
     }
     
     @Override
@@ -152,7 +160,8 @@ public class UserServiceImpl implements UserService {
     public void changePassword(Integer userId, String oldPassword, String newPassword) {
         logger.info("Password change requested for user ID: {}", userId);
         
-        User user = getUserById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         
         if (!BCrypt.checkpw(oldPassword, user.getPasswordHash())) {
             logger.warn("Password change failed: Incorrect old password for user ID: {}", userId);
@@ -188,29 +197,43 @@ public class UserServiceImpl implements UserService {
         return userRepository.usernameExists(username);
     }
     
-    private void validateUserData(User user) {
-        if (user == null) {
+    private void validateCreateUserRequest(CreateUserRequest request) {
+        if (request == null) {
             throw new ValidationException("User data cannot be null");
         }
         
-        if (user.getUsername() == null || user.getUsername().trim().isEmpty()) {
+        if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
             throw new ValidationException("username", "must not be empty");
         }
         
-        if (user.getUsername().length() < 3 || user.getUsername().length() > 50) {
+        if (request.getUsername().length() < 3 || request.getUsername().length() > 50) {
             throw new ValidationException("username", "must be between 3 and 50 characters");
         }
         
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+        if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
             throw new ValidationException("email", "must not be empty");
         }
         
-        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+        if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
             throw new ValidationException("email", "must be a valid email address");
         }
         
-        if (user.getUserType() == null) {
-            throw new ValidationException("userType", "must not be null");
+        validatePassword(request.getPassword());
+    }
+    
+    private void validateUpdateUserRequest(UpdateUserRequest request) {
+        if (request == null) {
+            throw new ValidationException("Update data cannot be null");
+        }
+        
+        if (request.getEmail() != null) {
+            if (request.getEmail().trim().isEmpty()) {
+                throw new ValidationException("email", "must not be empty");
+            }
+            
+            if (!request.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                throw new ValidationException("email", "must be a valid email address");
+            }
         }
     }
     
