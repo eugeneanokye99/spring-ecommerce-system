@@ -1,5 +1,8 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.OrderMapper;
+import com.shopjoy.dto.request.CreateOrderRequest;
+import com.shopjoy.dto.response.OrderResponse;
 import com.shopjoy.entity.Order;
 import com.shopjoy.entity.OrderItem;
 import com.shopjoy.entity.OrderStatus;
@@ -21,8 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
+/**
+ * The type Order service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
@@ -34,7 +41,16 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryService inventoryService;
     private final ProductService productService;
     private final UserService userService;
-    
+
+    /**
+     * Instantiates a new Order service.
+     *
+     * @param orderRepository     the order repository
+     * @param orderItemRepository the order item repository
+     * @param inventoryService    the inventory service
+     * @param productService      the product service
+     * @param userService         the user service
+     */
     public OrderServiceImpl(OrderRepository orderRepository,
                            OrderItemRepository orderItemRepository,
                            InventoryService inventoryService,
@@ -49,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     
     /**
      * COMPLEX TRANSACTION EXAMPLE
-     * 
+     * <p>
      * This method demonstrates a multi-entity transaction:
      * 1. Validates user exists
      * 2. Validates all products exist and are active
@@ -57,124 +73,88 @@ public class OrderServiceImpl implements OrderService {
      * 4. Reserves inventory (decreases stock)
      * 5. Creates order
      * 6. Creates order items
-     * 
+     * <p>
      * If ANY step fails, entire transaction is rolled back.
      * Uses SERIALIZABLE isolation to prevent phantom reads during stock checks.
      */
     @Override
-    @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-    public Order createOrder(Integer userId, List<OrderItem> orderItems, 
-                            String shippingAddress, String paymentMethod) {
-        logger.info("Creating order for user ID: {} with {} items", userId, orderItems.size());
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public OrderResponse createOrder(CreateOrderRequest request) {
+        logger.info("Creating order for user ID: {}", request.getUserId());
         
-        userService.getUserById(userId);
+        userService.getUserById(request.getUserId());
         
-        if (orderItems == null || orderItems.isEmpty()) {
-            throw new ValidationException("Order must contain at least one item");
-        }
-        
-        if (shippingAddress == null || shippingAddress.trim().isEmpty()) {
+        if (request.getShippingAddress() == null || request.getShippingAddress().trim().isEmpty()) {
             throw new ValidationException("Shipping address is required");
         }
         
-        if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
-            throw new ValidationException("Payment method is required");
-        }
-        
-        for (OrderItem item : orderItems) {
-            if (item.getQuantity() <= 0) {
-                throw new ValidationException("Item quantity must be positive");
-            }
-            
-            productService.getProductById(item.getProductId());
-            
-            if (!inventoryService.hasAvailableStock(item.getProductId(), item.getQuantity())) {
-                throw new ValidationException(
-                    String.format("Insufficient stock for product ID: %d", item.getProductId()));
-            }
-        }
-        
-        double totalAmount = calculateOrderTotal(orderItems);
-        
-        Order order = Order.builder()
-                .userId(userId)
-                .orderDate(LocalDateTime.now())
-                .totalAmount(totalAmount)
-                .status(OrderStatus.PENDING)
-                .shippingAddress(shippingAddress)
-                .paymentMethod(paymentMethod)
-                .paymentStatus(PaymentStatus.UNPAID)
-                .createdAt(LocalDateTime.now())
-                .updatedAt(LocalDateTime.now())
-                .build();
+        Order order = OrderMapper.toOrder(request);
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(OrderStatus.PENDING);
+        order.setPaymentStatus(PaymentStatus.UNPAID);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
         
         Order createdOrder = orderRepository.save(order);
         logger.info("Created order with ID: {}", createdOrder.getOrderId());
         
-        for (OrderItem item : orderItems) {
-            item.setOrderId(createdOrder.getOrderId());
-            item.setCreatedAt(LocalDateTime.now());
-            orderItemRepository.save(item);
-            
-            inventoryService.reserveStock(item.getProductId(), item.getQuantity());
-            logger.debug("Reserved {} units of product ID: {}", item.getQuantity(), item.getProductId());
-        }
-        
-        logger.info("Successfully created order ID: {} with total: {}", 
-                createdOrder.getOrderId(), totalAmount);
-        
-        return createdOrder;
+        return OrderMapper.toOrderResponse(createdOrder);
     }
     
     @Override
-    public Order getOrderById(Integer orderId) {
-        return orderRepository.findById(orderId)
+    public OrderResponse getOrderById(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+        return OrderMapper.toOrderResponse(order);
     }
     
     @Override
-    public List<Order> getOrdersByUser(Integer userId) {
-        return orderRepository.findByUserId(userId);
+    public List<OrderResponse> getOrdersByUser(Integer userId) {
+        List<Order> orders = orderRepository.findByUserId(userId);
+        return orders.stream()
+                .map(OrderMapper::toOrderResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Order> getOrdersByStatus(OrderStatus status) {
+    public List<OrderResponse> getOrdersByStatus(OrderStatus status) {
         if (status == null) {
             throw new ValidationException("Order status cannot be null");
         }
-        return orderRepository.findByStatus(status);
+        List<Order> orders = orderRepository.findByStatus(status);
+        return orders.stream()
+                .map(OrderMapper::toOrderResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Order> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<OrderResponse> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         if (startDate == null || endDate == null) {
             throw new ValidationException("Start and end dates cannot be null");
         }
         if (startDate.isAfter(endDate)) {
             throw new ValidationException("Start date must be before end date");
         }
-        return orderRepository.findByDateRange(startDate, endDate);
-    }
-    
-    @Override
-    public List<OrderItem> getOrderItems(Integer orderId) {
-        getOrderById(orderId);
-        return orderItemRepository.findByOrderId(orderId);
+        List<Order> orders = orderRepository.findByDateRange(startDate, endDate);
+        return orders.stream()
+                .map(OrderMapper::toOrderResponse)
+                .collect(Collectors.toList());
     }
     
     /**
      * STATE MACHINE PATTERN EXAMPLE
-     * 
+     * <p>
      * Order status transitions follow a specific workflow:
      * PENDING -> PROCESSING -> SHIPPED -> DELIVERED
      *         -> CANCELLED (from PENDING or PROCESSING only)
      */
     @Override
-    @Transactional(readOnly = false)
-    public Order updateOrderStatus(Integer orderId, OrderStatus newStatus) {
+    @Transactional()
+    public OrderResponse updateOrderStatus(Integer orderId, OrderStatus newStatus) {
         logger.info("Updating order {} status to: {}", orderId, newStatus);
         
-        Order order = getOrderById(orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         OrderStatus currentStatus = order.getStatus();
         
         validateStatusTransition(currentStatus, newStatus);
@@ -185,13 +165,14 @@ public class OrderServiceImpl implements OrderService {
         Order updatedOrder = orderRepository.update(order);
         logger.info("Successfully updated order {} status to: {}", orderId, newStatus);
         
-        return updatedOrder;
+        return OrderMapper.toOrderResponse(updatedOrder);
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Order confirmOrder(Integer orderId) {
-        Order order = getOrderById(orderId);
+    @Transactional()
+    public OrderResponse confirmOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new InvalidOrderStateException(orderId, order.getStatus().toString(), "confirm");
@@ -201,9 +182,10 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Order shipOrder(Integer orderId) {
-        Order order = getOrderById(orderId);
+    @Transactional()
+    public OrderResponse shipOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         if (order.getStatus() != OrderStatus.PROCESSING) {
             throw new InvalidOrderStateException(orderId, order.getStatus().toString(), "ship");
@@ -213,9 +195,10 @@ public class OrderServiceImpl implements OrderService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Order completeOrder(Integer orderId) {
-        Order order = getOrderById(orderId);
+    @Transactional()
+    public OrderResponse completeOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         if (order.getStatus() != OrderStatus.SHIPPED) {
             throw new InvalidOrderStateException(orderId, order.getStatus().toString(), "complete");
@@ -226,20 +209,21 @@ public class OrderServiceImpl implements OrderService {
     
     /**
      * COMPLEX ROLLBACK SCENARIO
-     * 
+     * <p> 
      * When cancelling an order, we must:
-     * 1. Validate order can be cancelled
+     * 1. Validate order can be canceled
      * 2. Release reserved inventory back to stock
      * 3. Update order status
-     * 
+     * <p> 
      * If inventory release fails, entire transaction rolls back.
      */
     @Override
-    @Transactional(readOnly = false)
-    public Order cancelOrder(Integer orderId) {
+    @Transactional()
+    public OrderResponse cancelOrder(Integer orderId) {
         logger.info("Cancelling order ID: {}", orderId);
         
-        Order order = getOrderById(orderId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         
         if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.PROCESSING) {
             throw new InvalidOrderStateException(
@@ -248,7 +232,7 @@ public class OrderServiceImpl implements OrderService {
                 "cancel (can only cancel PENDING or PROCESSING orders)");
         }
         
-        List<OrderItem> orderItems = getOrderItems(orderId);
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
         
         for (OrderItem item : orderItems) {
             inventoryService.releaseStock(item.getProductId(), item.getQuantity());
@@ -261,22 +245,11 @@ public class OrderServiceImpl implements OrderService {
         Order cancelledOrder = orderRepository.update(order);
         logger.info("Successfully cancelled order ID: {}", orderId);
         
-        return cancelledOrder;
+        return OrderMapper.toOrderResponse(cancelledOrder);
     }
     
     @Override
-    public double calculateOrderTotal(List<OrderItem> orderItems) {
-        if (orderItems == null || orderItems.isEmpty()) {
-            return 0.0;
-        }
-        
-        return orderItems.stream()
-                .mapToDouble(item -> item.getUnitPrice() * item.getQuantity())
-                .sum();
-    }
-    
-    @Override
-    public List<Order> getPendingOrders() {
+    public List<OrderResponse> getPendingOrders() {
         return getOrdersByStatus(OrderStatus.PENDING);
     }
     

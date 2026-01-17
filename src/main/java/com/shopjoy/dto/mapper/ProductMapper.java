@@ -5,13 +5,11 @@ import com.shopjoy.dto.request.UpdateProductRequest;
 import com.shopjoy.dto.response.ProductResponse;
 import com.shopjoy.entity.Product;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Mapper utility for converting between Product entity and DTOs.
  * All methods are static - no need to create an instance.
- * 
+ * <p>
  * Usage examples:
  * - Product product = ProductMapper.toProduct(createRequest);
  * - ProductResponse response = ProductMapper.toProductResponse(product);
@@ -72,25 +70,7 @@ public class ProductMapper {
             product.getUpdatedAt()
         );
     }
-    
-    /**
-     * Converts a list of Product entities to a list of ProductResponse DTOs.
-     * Use this for endpoints that return multiple products.
-     * 
-     * @param products list of product entities
-     * @return list of response DTOs
-     */
-    public static List<ProductResponse> toProductResponseList(List<Product> products) {
-        if (products == null) {
-            return null;
-        }
-        
-        List<ProductResponse> responses = new ArrayList<>();
-        for (Product product : products) {
-            responses.add(toProductResponse(product));
-        }
-        return responses;
-    }
+
     
     /**
      * Updates an existing Product entity with data from UpdateProductRequest.

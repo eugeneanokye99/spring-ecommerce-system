@@ -3,10 +3,14 @@ package com.shopjoy.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request DTO for creating a new category.
  */
+@Setter
+@Getter
 public class CreateCategoryRequest {
     
     @NotBlank(message = "Category name is required")
@@ -18,31 +22,11 @@ public class CreateCategoryRequest {
     
     @Positive(message = "Parent category ID must be positive")
     private Integer parentCategoryId;
-    
+
+    /**
+     * Instantiates a new Create category request.
+     */
     public CreateCategoryRequest() {
     }
-    
-    public String getCategoryName() {
-        return categoryName;
-    }
-    
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-    
-    public String getDescription() {
-        return description;
-    }
-    
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public Integer getParentCategoryId() {
-        return parentCategoryId;
-    }
-    
-    public void setParentCategoryId(Integer parentCategoryId) {
-        this.parentCategoryId = parentCategoryId;
-    }
+
 }

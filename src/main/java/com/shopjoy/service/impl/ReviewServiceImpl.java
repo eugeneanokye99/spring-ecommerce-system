@@ -1,5 +1,9 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.ReviewMapper;
+import com.shopjoy.dto.request.CreateReviewRequest;
+import com.shopjoy.dto.request.UpdateReviewRequest;
+import com.shopjoy.dto.response.ReviewResponse;
 import com.shopjoy.entity.Review;
 import com.shopjoy.exception.BusinessException;
 import com.shopjoy.exception.ResourceNotFoundException;
@@ -14,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * The type Review service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class ReviewServiceImpl implements ReviewService {
@@ -23,18 +31,25 @@ public class ReviewServiceImpl implements ReviewService {
     
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
-    
+
+    /**
+     * Instantiates a new Review service.
+     *
+     * @param reviewRepository the review repository
+     * @param orderRepository  the order repository
+     */
     public ReviewServiceImpl(ReviewRepository reviewRepository, OrderRepository orderRepository) {
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Review createReview(Review review) {
+    @Transactional()
+    public ReviewResponse createReview(CreateReviewRequest request) {
         logger.info("Creating review for product {} by user {}", 
-                review.getProductId(), review.getUserId());
+                request.getProductId(), request.getUserId());
         
+        Review review = ReviewMapper.toReview(request);
         validateReviewData(review);
         
         if (reviewRepository.hasUserReviewedProduct(review.getUserId(), review.getProductId())) {
@@ -55,38 +70,47 @@ public class ReviewServiceImpl implements ReviewService {
         Review createdReview = reviewRepository.save(review);
         logger.info("Successfully created review ID: {}", createdReview.getReviewId());
         
-        return createdReview;
+        return ReviewMapper.toReviewResponse(createdReview);
     }
     
     @Override
-    public Review getReviewById(Integer reviewId) {
-        return reviewRepository.findById(reviewId)
+    public ReviewResponse getReviewById(Integer reviewId) {
+        Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
+        return ReviewMapper.toReviewResponse(review);
     }
     
     @Override
-    public List<Review> getReviewsByProduct(Integer productId) {
-        return reviewRepository.findByProductId(productId);
+    public List<ReviewResponse> getReviewsByProduct(Integer productId) {
+        return reviewRepository.findByProductId(productId).stream()
+                .map(ReviewMapper::toReviewResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Review> getReviewsByUser(Integer userId) {
-        return reviewRepository.findByUserId(userId);
+    public List<ReviewResponse> getReviewsByUser(Integer userId) {
+        return reviewRepository.findByUserId(userId).stream()
+                .map(ReviewMapper::toReviewResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Review updateReview(Review review) {
-        logger.info("Updating review ID: {}", review.getReviewId());
+    @Transactional()
+    public ReviewResponse updateReview(Integer reviewId, UpdateReviewRequest request) {
+        logger.info("Updating review ID: {}", reviewId);
         
-        getReviewById(review.getReviewId());
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", "id", reviewId));
+        
+        ReviewMapper.updateReviewFromRequest(review, request);
         validateReviewData(review);
         
-        return reviewRepository.update(review);
+        Review updatedReview = reviewRepository.update(review);
+        return ReviewMapper.toReviewResponse(updatedReview);
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteReview(Integer reviewId) {
         logger.info("Deleting review ID: {}", reviewId);
         
@@ -98,12 +122,13 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    public List<Review> getReviewsByRating(Integer productId, int rating) {
+    public List<ReviewResponse> getReviewsByRating(Integer productId, int rating) {
         if (rating < 1 || rating > 5) {
             throw new ValidationException("rating", "must be between 1 and 5");
         }
         return reviewRepository.findByProductId(productId).stream()
                 .filter(review -> review.getRating() == rating)
+                .map(ReviewMapper::toReviewResponse)
                 .toList();
     }
     
@@ -113,8 +138,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Review markReviewAsHelpful(Integer reviewId) {
+    @Transactional()
+    public ReviewResponse markReviewAsHelpful(Integer reviewId) {
         logger.debug("Incrementing helpful count for review {}", reviewId);
         
         if (!reviewRepository.existsById(reviewId)) {
@@ -122,7 +147,8 @@ public class ReviewServiceImpl implements ReviewService {
         }
         
         reviewRepository.incrementHelpfulCount(reviewId);
-        return getReviewById(reviewId);
+        Review review = reviewRepository.findById(reviewId).orElseThrow();
+        return ReviewMapper.toReviewResponse(review);
     }
     
     private void validateReviewData(Review review) {

@@ -4,10 +4,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request DTO for creating a new order.
  */
+@Setter
+@Getter
 public class CreateOrderRequest {
     
     @NotNull(message = "User ID is required")
@@ -20,31 +24,11 @@ public class CreateOrderRequest {
     
     @Size(max = 1000, message = "Notes cannot exceed 1000 characters")
     private String notes;
-    
+
+    /**
+     * Instantiates a new Create order request.
+     */
     public CreateOrderRequest() {
     }
-    
-    public Integer getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    
-    public String getShippingAddress() {
-        return shippingAddress;
-    }
-    
-    public void setShippingAddress(String shippingAddress) {
-        this.shippingAddress = shippingAddress;
-    }
-    
-    public String getNotes() {
-        return notes;
-    }
-    
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
+
 }

@@ -18,13 +18,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Order repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class OrderRepository implements GenericRepository<Order, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Order> orderRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Order> orderRowMapper = (rs, _) -> {
         Order order = new Order();
         order.setOrderId(rs.getInt("order_id"));
         order.setUserId(rs.getInt("user_id"));
@@ -45,6 +48,11 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
         return order;
     };
 
+    /**
+     * Instantiates a new Order repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public OrderRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -66,7 +74,7 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order save(Order order) {
         String sql = "INSERT INTO orders (user_id, order_date, total_amount, status, shipping_address, payment_method, payment_status, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?) RETURNING order_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -87,7 +95,7 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Order update(Order order) {
         String sql = "UPDATE orders SET status = ?, payment_status = ?, notes = ? WHERE order_id = ?";
         jdbcTemplate.update(sql, 
@@ -98,7 +106,7 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer orderId) {
         return jdbcTemplate.update("DELETE FROM orders WHERE order_id = ?", orderId) > 0;
     }
@@ -115,47 +123,48 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
         return count != null && count > 0;
     }
 
+    /**
+     * Find by user id list.
+     *
+     * @param userId the user id
+     * @return the list
+     */
     public List<Order> findByUserId(int userId) {
         return jdbcTemplate.query("SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC", 
             orderRowMapper, userId);
     }
 
+    /**
+     * Find by status list.
+     *
+     * @param status the status
+     * @return the list
+     */
     public List<Order> findByStatus(OrderStatus status) {
         return jdbcTemplate.query("SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC", 
             orderRowMapper, status.toString().toLowerCase());
     }
 
+    /**
+     * Find by date range list.
+     *
+     * @param startDate the start date
+     * @param endDate   the end date
+     * @return the list
+     */
     public List<Order> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
         return jdbcTemplate.query("SELECT * FROM orders WHERE order_date BETWEEN ? AND ? ORDER BY order_date DESC", 
             orderRowMapper, startDate, endDate);
     }
 
-    public List<Order> findRecentOrders(int limit) {
-        return jdbcTemplate.query("SELECT * FROM orders ORDER BY order_date DESC LIMIT ?", 
-            orderRowMapper, limit);
-    }
 
-    @Transactional(readOnly = false)
-    public boolean updateStatus(int orderId, OrderStatus status) {
-        return jdbcTemplate.update("UPDATE orders SET status = ? WHERE order_id = ?", 
-            status.toString().toLowerCase(), orderId) > 0;
-    }
-
-    @Transactional(readOnly = false)
-    public boolean updatePaymentStatus(int orderId, PaymentStatus status) {
-        return jdbcTemplate.update("UPDATE orders SET payment_status = ? WHERE order_id = ?", 
-            status.toString().toLowerCase(), orderId) > 0;
-    }
-
-    public long countByUserId(int userId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM orders WHERE user_id = ?", Long.class, userId);
-        return count != null ? count : 0L;
-    }
-
-    public Double getTotalSalesByUser(int userId) {
-        return jdbcTemplate.queryForObject("SELECT SUM(total_amount) FROM orders WHERE user_id = ?", Double.class, userId);
-    }
-
+    /**
+     * Has user purchased product boolean.
+     *
+     * @param userId    the user id
+     * @param productId the product id
+     * @return the boolean
+     */
     public boolean hasUserPurchasedProduct(int userId, int productId) {
         String sql = "SELECT COUNT(*) FROM order_items oi " +
                      "JOIN orders o ON oi.order_id = o.order_id " +

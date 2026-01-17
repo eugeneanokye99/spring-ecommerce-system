@@ -5,14 +5,18 @@ import com.shopjoy.dto.request.UpdateAddressRequest;
 import com.shopjoy.dto.response.AddressResponse;
 import com.shopjoy.entity.Address;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Mapper for Address entity and DTOs.
  */
 public class AddressMapper {
-    
+
+    /**
+     * To address.
+     *
+     * @param request the request
+     * @return the address
+     */
     public static Address toAddress(CreateAddressRequest request) {
         if (request == null) {
             return null;
@@ -30,7 +34,13 @@ public class AddressMapper {
         
         return address;
     }
-    
+
+    /**
+     * To address response.
+     *
+     * @param address the address
+     * @return the address response
+     */
     public static AddressResponse toAddressResponse(Address address) {
         if (address == null) {
             return null;
@@ -49,19 +59,14 @@ public class AddressMapper {
             address.getCreatedAt()
         );
     }
-    
-    public static List<AddressResponse> toAddressResponseList(List<Address> addresses) {
-        if (addresses == null) {
-            return null;
-        }
-        
-        List<AddressResponse> responses = new ArrayList<>();
-        for (Address address : addresses) {
-            responses.add(toAddressResponse(address));
-        }
-        return responses;
-    }
-    
+
+
+    /**
+     * Update address from request.
+     *
+     * @param address the address
+     * @param request the request
+     */
     public static void updateAddressFromRequest(Address address, UpdateAddressRequest request) {
         if (address == null || request == null) {
             return;

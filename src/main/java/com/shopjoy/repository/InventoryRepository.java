@@ -15,13 +15,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Inventory repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class InventoryRepository implements GenericRepository<Inventory, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<Inventory> inventoryRowMapper = (rs, rowNum) -> {
+    private final RowMapper<Inventory> inventoryRowMapper = (rs, _) -> {
         Inventory inventory = new Inventory();
         inventory.setInventoryId(rs.getInt("inventory_id"));
         inventory.setProductId(rs.getInt("product_id"));
@@ -35,6 +38,11 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
         return inventory;
     };
 
+    /**
+     * Instantiates a new Inventory repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public InventoryRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -56,7 +64,7 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory save(Inventory inventory) {
         String sql = "INSERT INTO inventory (product_id, quantity_in_stock, reorder_level, warehouse_location, last_restocked, updated_at) VALUES (?, ?, ?, ?, ?, ?) RETURNING inventory_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -75,7 +83,7 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public Inventory update(Inventory inventory) {
         String sql = "UPDATE inventory SET quantity_in_stock = ?, reorder_level = ?, warehouse_location = ?, updated_at = CURRENT_TIMESTAMP WHERE inventory_id = ?";
         jdbcTemplate.update(sql, inventory.getQuantityInStock(), inventory.getReorderLevel(), 
@@ -84,7 +92,7 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer inventoryId) {
         return jdbcTemplate.update("DELETE FROM inventory WHERE inventory_id = ?", inventoryId) > 0;
     }
@@ -101,6 +109,12 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
         return count != null && count > 0;
     }
 
+    /**
+     * Find by product id optional.
+     *
+     * @param productId the product id
+     * @return the optional
+     */
     public Optional<Inventory> findByProductId(int productId) {
         String sql = "SELECT * FROM inventory WHERE product_id = ?";
         try {
@@ -110,34 +124,50 @@ public class InventoryRepository implements GenericRepository<Inventory, Integer
         }
     }
 
-    @Transactional(readOnly = false)
-    public boolean updateStock(int productId, int quantity) {
-        return jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?", 
-            quantity, productId) > 0;
+    /**
+     * Update stock.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     */
+    @Transactional()
+    public void updateStock(int productId, int quantity) {
+        jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?",
+                quantity, productId);
     }
 
-    @Transactional(readOnly = false)
-    public boolean incrementStock(int productId, int increment) {
-        return jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = quantity_in_stock + ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?", 
-            increment, productId) > 0;
+    /**
+     * Increment stock.
+     *
+     * @param productId the product id
+     * @param increment the increment
+     */
+    @Transactional()
+    public void incrementStock(int productId, int increment) {
+        jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = quantity_in_stock + ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?",
+                increment, productId);
     }
 
-    @Transactional(readOnly = false)
-    public boolean decrementStock(int productId, int decrement) {
-        return jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = quantity_in_stock - ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ? AND quantity_in_stock >= ?", 
-            decrement, productId, decrement) > 0;
+    /**
+     * Decrement stock.
+     *
+     * @param productId the product id
+     * @param decrement the decrement
+     */
+    @Transactional()
+    public void decrementStock(int productId, int decrement) {
+        jdbcTemplate.update("UPDATE inventory SET quantity_in_stock = quantity_in_stock - ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ? AND quantity_in_stock >= ?",
+                decrement, productId, decrement);
     }
 
+    /**
+     * Find low stock list.
+     *
+     * @return the list
+     */
     public List<Inventory> findLowStock() {
         return jdbcTemplate.query("SELECT * FROM inventory WHERE quantity_in_stock <= reorder_level", inventoryRowMapper);
     }
 
-    public List<Inventory> findOutOfStock() {
-        return jdbcTemplate.query("SELECT * FROM inventory WHERE quantity_in_stock = 0", inventoryRowMapper);
-    }
 
-    public long countLowStock() {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM inventory WHERE quantity_in_stock <= reorder_level", Long.class);
-        return count != null ? count : 0L;
-    }
 }

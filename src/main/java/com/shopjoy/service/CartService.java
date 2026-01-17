@@ -1,6 +1,7 @@
 package com.shopjoy.service;
 
-import com.shopjoy.entity.CartItem;
+import com.shopjoy.dto.request.AddToCartRequest;
+import com.shopjoy.dto.response.CartItemResponse;
 import com.shopjoy.exception.InsufficientStockException;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -17,27 +18,25 @@ public interface CartService {
      * Adds a product to the user's cart.
      * If product already exists in cart, updates the quantity.
      * 
-     * @param userId the user ID
-     * @param productId the product ID
-     * @param quantity the quantity to add
-     * @return the cart item
+     * @param request the add to cart request
+     * @return the cart item response
      * @throws ResourceNotFoundException if user or product not found
      * @throws ValidationException if quantity is invalid
      * @throws InsufficientStockException if requested quantity exceeds available stock
      */
-    CartItem addToCart(Integer userId, Integer productId, int quantity);
+    CartItemResponse addToCart(AddToCartRequest request);
     
     /**
      * Updates the quantity of an item in the cart.
      * 
      * @param cartItemId the cart item ID
      * @param newQuantity the new quantity
-     * @return the updated cart item
+     * @return the updated cart item response
      * @throws ResourceNotFoundException if cart item not found
      * @throws ValidationException if quantity is invalid
      * @throws InsufficientStockException if requested quantity exceeds available stock
      */
-    CartItem updateCartItemQuantity(Integer cartItemId, int newQuantity);
+    CartItemResponse updateCartItemQuantity(Integer cartItemId, int newQuantity);
     
     /**
      * Removes an item from the cart.
@@ -51,9 +50,9 @@ public interface CartService {
      * Retrieves all items in a user's cart.
      * 
      * @param userId the user ID
-     * @return list of cart items
+     * @return list of cart item responses
      */
-    List<CartItem> getCartItems(Integer userId);
+    List<CartItemResponse> getCartItems(Integer userId);
     
     /**
      * Clears all items from a user's cart.

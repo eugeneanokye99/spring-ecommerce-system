@@ -1,7 +1,10 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.CartItemMapper;
+import com.shopjoy.dto.request.AddToCartRequest;
+import com.shopjoy.dto.response.CartItemResponse;
+import com.shopjoy.dto.response.ProductResponse;
 import com.shopjoy.entity.CartItem;
-import com.shopjoy.entity.Product;
 import com.shopjoy.exception.InsufficientStockException;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -17,7 +20,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * The type Cart service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class CartServiceImpl implements CartService {
@@ -27,7 +34,14 @@ public class CartServiceImpl implements CartService {
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
     private final InventoryService inventoryService;
-    
+
+    /**
+     * Instantiates a new Cart service.
+     *
+     * @param cartItemRepository the cart item repository
+     * @param productService     the product service
+     * @param inventoryService   the inventory service
+     */
     public CartServiceImpl(CartItemRepository cartItemRepository,
                           ProductService productService,
                           InventoryService inventoryService) {
@@ -37,47 +51,49 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public CartItem addToCart(Integer userId, Integer productId, int quantity) {
-        logger.info("Adding product {} to cart for user {}", productId, userId);
+    @Transactional()
+    public CartItemResponse addToCart(AddToCartRequest request) {
+        logger.info("Adding product {} to cart for user {}", request.getProductId(), request.getUserId());
         
-        if (quantity <= 0) {
+        if (request.getQuantity() <= 0) {
             throw new ValidationException("quantity", "must be positive");
         }
         
-        productService.getProductById(productId);
+        productService.getProductById(request.getProductId());
         
-        if (!inventoryService.hasAvailableStock(productId, quantity)) {
-            throw new InsufficientStockException(productId, quantity, 0);
+        if (!inventoryService.hasAvailableStock(request.getProductId(), request.getQuantity())) {
+            throw new InsufficientStockException(request.getProductId(), request.getQuantity(), 0);
         }
         
-        Optional<CartItem> existingItem = cartItemRepository.findByUserAndProduct(userId, productId);
+        Optional<CartItem> existingItem = cartItemRepository.findByUserAndProduct(request.getUserId(), request.getProductId());
         
         if (existingItem.isPresent()) {
             CartItem cartItem = existingItem.get();
-            int newQuantity = cartItem.getQuantity() + quantity;
+            int newQuantity = cartItem.getQuantity() + request.getQuantity();
             
-            if (!inventoryService.hasAvailableStock(productId, newQuantity)) {
-                throw new InsufficientStockException(productId, newQuantity, 0);
+            if (!inventoryService.hasAvailableStock(request.getProductId(), newQuantity)) {
+                throw new InsufficientStockException(request.getProductId(), newQuantity, 0);
             }
             
             cartItem.setQuantity(newQuantity);
-            return cartItemRepository.update(cartItem);
+            CartItem updatedItem = cartItemRepository.update(cartItem);
+            return CartItemMapper.toCartItemResponse(updatedItem);
         } else {
             CartItem cartItem = CartItem.builder()
-                    .userId(userId)
-                    .productId(productId)
-                    .quantity(quantity)
+                    .userId(request.getUserId())
+                    .productId(request.getProductId())
+                    .quantity(request.getQuantity())
                     .createdAt(LocalDateTime.now())
                     .build();
             
-            return cartItemRepository.save(cartItem);
+            CartItem savedItem = cartItemRepository.save(cartItem);
+            return CartItemMapper.toCartItemResponse(savedItem);
         }
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public CartItem updateCartItemQuantity(Integer cartItemId, int newQuantity) {
+    @Transactional()
+    public CartItemResponse updateCartItemQuantity(Integer cartItemId, int newQuantity) {
         logger.info("Updating cart item {} quantity to {}", cartItemId, newQuantity);
         
         if (newQuantity <= 0) {
@@ -92,11 +108,12 @@ public class CartServiceImpl implements CartService {
         }
         
         cartItem.setQuantity(newQuantity);
-        return cartItemRepository.update(cartItem);
+        CartItem updatedItem = cartItemRepository.update(cartItem);
+        return CartItemMapper.toCartItemResponse(updatedItem);
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void removeFromCart(Integer cartItemId) {
         logger.info("Removing cart item {}", cartItemId);
         
@@ -108,12 +125,15 @@ public class CartServiceImpl implements CartService {
     }
     
     @Override
-    public List<CartItem> getCartItems(Integer userId) {
-        return cartItemRepository.findByUserId(userId);
+    public List<CartItemResponse> getCartItems(Integer userId) {
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
+        return items.stream()
+                .map(CartItemMapper::toCartItemResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void clearCart(Integer userId) {
         logger.info("Clearing cart for user {}", userId);
         cartItemRepository.clearCart(userId);
@@ -121,11 +141,11 @@ public class CartServiceImpl implements CartService {
     
     @Override
     public double getCartTotal(Integer userId) {
-        List<CartItem> items = getCartItems(userId);
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
         
         return items.stream()
                 .mapToDouble(item -> {
-                    Product product = productService.getProductById(item.getProductId());
+                    ProductResponse product = productService.getProductById(item.getProductId());
                     return product.getPrice() * item.getQuantity();
                 })
                 .sum();
@@ -133,7 +153,7 @@ public class CartServiceImpl implements CartService {
     
     @Override
     public int getCartItemCount(Integer userId) {
-        List<CartItem> items = getCartItems(userId);
+        List<CartItem> items = cartItemRepository.findByUserId(userId);
         return items.stream()
                 .mapToInt(CartItem::getQuantity)
                 .sum();

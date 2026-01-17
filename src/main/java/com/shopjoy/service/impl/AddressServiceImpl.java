@@ -1,5 +1,9 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.AddressMapper;
+import com.shopjoy.dto.request.CreateAddressRequest;
+import com.shopjoy.dto.request.UpdateAddressRequest;
+import com.shopjoy.dto.response.AddressResponse;
 import com.shopjoy.entity.Address;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
@@ -12,7 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * The type Address service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class AddressServiceImpl implements AddressService {
@@ -20,47 +28,60 @@ public class AddressServiceImpl implements AddressService {
     private static final Logger logger = LoggerFactory.getLogger(AddressServiceImpl.class);
     
     private final AddressRepository addressRepository;
-    
+
+    /**
+     * Instantiates a new Address service.
+     *
+     * @param addressRepository the address repository
+     */
     public AddressServiceImpl(AddressRepository addressRepository) {
         this.addressRepository = addressRepository;
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Address createAddress(Address address) {
-        logger.info("Creating new address for user {}", address.getUserId());
+    @Transactional()
+    public AddressResponse createAddress(CreateAddressRequest request) {
+        logger.info("Creating new address for user {}", request.getUserId());
         
-        validateAddressData(address);
+        Address address = AddressMapper.toAddress(request);
         address.setCreatedAt(LocalDateTime.now());
         
-        return addressRepository.save(address);
+        Address savedAddress = addressRepository.save(address);
+        return AddressMapper.toAddressResponse(savedAddress);
     }
     
     @Override
-    public Address getAddressById(Integer addressId) {
-        return addressRepository.findById(addressId)
+    public AddressResponse getAddressById(Integer addressId) {
+        Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
+        return AddressMapper.toAddressResponse(address);
     }
     
     @Override
-    public List<Address> getAddressesByUser(Integer userId) {
+    public List<AddressResponse> getAddressesByUser(Integer userId) {
         logger.info("Fetching addresses for user {}", userId);
-        return addressRepository.findByUserId(userId);
+        List<Address> addresses = addressRepository.findByUserId(userId);
+        return addresses.stream()
+                .map(AddressMapper::toAddressResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional(readOnly = false)
-    public Address updateAddress(Address address) {
-        logger.info("Updating address ID: {}", address.getAddressId());
+    @Transactional()
+    public AddressResponse updateAddress(Integer addressId, UpdateAddressRequest request) {
+        logger.info("Updating address ID: {}", addressId);
         
-        getAddressById(address.getAddressId());
-        validateAddressData(address);
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
         
-        return addressRepository.update(address);
+        AddressMapper.updateAddressFromRequest(address, request);
+        
+        Address updatedAddress = addressRepository.update(address);
+        return AddressMapper.toAddressResponse(updatedAddress);
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteAddress(Integer addressId) {
         logger.info("Deleting address ID: {}", addressId);
         
@@ -72,50 +93,23 @@ public class AddressServiceImpl implements AddressService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Address setDefaultAddress(Integer addressId) {
+    @Transactional()
+    public AddressResponse setDefaultAddress(Integer addressId) {
         logger.info("Setting default address {}", addressId);
         
-        Address address = getAddressById(addressId);
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
         int userId = address.getUserId();
         
         addressRepository.clearDefaultAddresses(userId);
-        return addressRepository.setDefaultAddress(addressId);
+        Address updatedAddress = addressRepository.setDefaultAddress(addressId);
+        return AddressMapper.toAddressResponse(updatedAddress);
     }
     
     @Override
-    public Address getDefaultAddress(Integer userId) {
-        return addressRepository.findDefaultAddress(userId)
+    public AddressResponse getDefaultAddress(Integer userId) {
+        Address address = addressRepository.findDefaultAddress(userId)
                 .orElse(null);
-    }
-    
-    private void validateAddressData(Address address) {
-        if (address == null) {
-            throw new ValidationException("Address data cannot be null");
-        }
-        
-        if (address.getUserId() == 0) {
-            throw new ValidationException("userId", "is required");
-        }
-        
-        if (address.getStreetAddress() == null || address.getStreetAddress().trim().isEmpty()) {
-            throw new ValidationException("streetAddress", "must not be empty");
-        }
-        
-        if (address.getCity() == null || address.getCity().trim().isEmpty()) {
-            throw new ValidationException("city", "must not be empty");
-        }
-        
-        if (address.getState() == null || address.getState().trim().isEmpty()) {
-            throw new ValidationException("state", "must not be empty");
-        }
-        
-        if (address.getPostalCode() == null || address.getPostalCode().trim().isEmpty()) {
-            throw new ValidationException("postalCode", "must not be empty");
-        }
-        
-        if (address.getCountry() == null || address.getCountry().trim().isEmpty()) {
-            throw new ValidationException("country", "must not be empty");
-        }
+        return address != null ? AddressMapper.toAddressResponse(address) : null;
     }
 }

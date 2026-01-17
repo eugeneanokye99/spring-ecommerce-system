@@ -1,8 +1,23 @@
 package com.shopjoy.entity;
 
+import lombok.Getter;
+
+/**
+ * The enum Payment status.
+ */
+@Getter
 public enum PaymentStatus {
+    /**
+     * Unpaid payment status.
+     */
     UNPAID("Unpaid"),
+    /**
+     * Paid payment status.
+     */
     PAID("Paid"),
+    /**
+     * Refunded payment status.
+     */
     REFUNDED("Refunded");
 
     private final String displayName;
@@ -11,10 +26,12 @@ public enum PaymentStatus {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
+    /**
+     * From string payment status.
+     *
+     * @param value the value
+     * @return the payment status
+     */
     public static PaymentStatus fromString(String value) {
         if (value == null)
             return null;

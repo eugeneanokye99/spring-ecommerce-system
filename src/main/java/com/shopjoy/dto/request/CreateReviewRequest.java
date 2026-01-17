@@ -1,10 +1,14 @@
 package com.shopjoy.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Request DTO for creating a product review.
  */
+@Setter
+@Getter
 public class CreateReviewRequest {
     
     @NotNull(message = "User ID is required")
@@ -26,47 +30,11 @@ public class CreateReviewRequest {
     
     @Size(max = 1000, message = "Comment cannot exceed 1000 characters")
     private String comment;
-    
+
+    /**
+     * Instantiates a new Create review request.
+     */
     public CreateReviewRequest() {
     }
-    
-    public Integer getUserId() {
-        return userId;
-    }
-    
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-    
-    public Integer getProductId() {
-        return productId;
-    }
-    
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
-    
-    public Integer getRating() {
-        return rating;
-    }
-    
-    public void setRating(Integer rating) {
-        this.rating = rating;
-    }
-    
-    public String getTitle() {
-        return title;
-    }
-    
-    public void setTitle(String title) {
-        this.title = title;
-    }
-    
-    public String getComment() {
-        return comment;
-    }
-    
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+
 }

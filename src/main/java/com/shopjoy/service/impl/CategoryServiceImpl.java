@@ -1,5 +1,9 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.mapper.CategoryMapper;
+import com.shopjoy.dto.request.CreateCategoryRequest;
+import com.shopjoy.dto.request.UpdateCategoryRequest;
+import com.shopjoy.dto.response.CategoryResponse;
 import com.shopjoy.entity.Category;
 import com.shopjoy.exception.BusinessException;
 import com.shopjoy.exception.ResourceNotFoundException;
@@ -14,7 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * The type Category service.
+ */
 @Service
 @Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
@@ -23,16 +31,24 @@ public class CategoryServiceImpl implements CategoryService {
     
     private final CategoryRepository categoryRepository;
     private final ProductService productService;
-    
+
+    /**
+     * Instantiates a new Category service.
+     *
+     * @param categoryRepository the category repository
+     * @param productService     the product service
+     */
     public CategoryServiceImpl(CategoryRepository categoryRepository, ProductService productService) {
         this.categoryRepository = categoryRepository;
         this.productService = productService;
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Category createCategory(Category category) {
-        logger.info("Creating new category: {}", category.getCategoryName());
+    @Transactional()
+    public CategoryResponse createCategory(CreateCategoryRequest request) {
+        logger.info("Creating new category: {}", request.getCategoryName());
+        
+        Category category = CategoryMapper.toCategory(request);
         
         validateCategoryData(category);
         
@@ -45,31 +61,38 @@ public class CategoryServiceImpl implements CategoryService {
         Category createdCategory = categoryRepository.save(category);
         
         logger.info("Successfully created category with ID: {}", createdCategory.getCategoryId());
-        return createdCategory;
+        return CategoryMapper.toCategoryResponse(createdCategory);
     }
     
     @Override
-    public Category getCategoryById(Integer categoryId) {
-        return categoryRepository.findById(categoryId)
+    public CategoryResponse getCategoryById(Integer categoryId) {
+        Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+        return CategoryMapper.toCategoryResponse(category);
     }
     
     @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(CategoryMapper::toCategoryResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Category> getTopLevelCategories() {
-        return categoryRepository.findTopLevelCategories();
+    public List<CategoryResponse> getTopLevelCategories() {
+        return categoryRepository.findTopLevelCategories().stream()
+                .map(CategoryMapper::toCategoryResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
-    public List<Category> getSubcategories(Integer parentCategoryId) {
+    public List<CategoryResponse> getSubcategories(Integer parentCategoryId) {
         if (parentCategoryId == null) {
             throw new ValidationException("Parent category ID cannot be null");
         }
-        return categoryRepository.findSubcategories(parentCategoryId);
+        return categoryRepository.findSubcategories(parentCategoryId).stream()
+                .map(CategoryMapper::toCategoryResponse)
+                .collect(Collectors.toList());
     }
     
     @Override
@@ -81,11 +104,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Category updateCategory(Category category) {
-        logger.info("Updating category ID: {}", category.getCategoryId());
+    @Transactional()
+    public CategoryResponse updateCategory(Integer categoryId, UpdateCategoryRequest request) {
+        logger.info("Updating category ID: {}", categoryId);
         
-        getCategoryById(category.getCategoryId());
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
+        
+        CategoryMapper.updateCategoryFromRequest(category, request);
         validateCategoryData(category);
         
         if (category.getParentCategoryId() != null) {
@@ -99,13 +125,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
         
         Category updatedCategory = categoryRepository.update(category);
-        logger.info("Successfully updated category ID: {}", category.getCategoryId());
+        logger.info("Successfully updated category ID: {}", categoryId);
         
-        return updatedCategory;
+        return CategoryMapper.toCategoryResponse(updatedCategory);
     }
     
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public void deleteCategory(Integer categoryId) {
         logger.info("Deleting category ID: {}", categoryId);
         
@@ -128,11 +154,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
     
     @Override
-    @Transactional(readOnly = false)
-    public Category moveCategory(Integer categoryId, Integer newParentId) {
+    @Transactional()
+    public CategoryResponse moveCategory(Integer categoryId, Integer newParentId) {
         logger.info("Moving category {} to parent {}", categoryId, newParentId);
         
-        Category category = getCategoryById(categoryId);
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "id", categoryId));
         
         if (newParentId != null) {
             if (newParentId.equals(categoryId)) {
@@ -148,7 +175,8 @@ public class CategoryServiceImpl implements CategoryService {
         }
         
         category.setParentCategoryId(newParentId);
-        return categoryRepository.update(category);
+        Category updatedCategory = categoryRepository.update(category);
+        return CategoryMapper.toCategoryResponse(updatedCategory);
     }
     
     private boolean wouldCreateCircularReference(Integer categoryId, Integer newParentId) {

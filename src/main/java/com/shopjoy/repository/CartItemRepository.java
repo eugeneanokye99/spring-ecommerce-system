@@ -15,13 +15,16 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * The type Cart item repository.
+ */
 @Repository
 @Transactional(readOnly = true)
 public class CartItemRepository implements GenericRepository<CartItem, Integer> {
 
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<CartItem> cartItemRowMapper = (rs, rowNum) -> {
+    private final RowMapper<CartItem> cartItemRowMapper = (rs, _) -> {
         CartItem item = new CartItem();
         item.setCartItemId(rs.getInt("cart_item_id"));
         item.setUserId(rs.getInt("user_id"));
@@ -32,6 +35,11 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
         return item;
     };
 
+    /**
+     * Instantiates a new Cart item repository.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public CartItemRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -53,7 +61,7 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public CartItem save(CartItem item) {
         Optional<CartItem> existing = findByUserAndProduct(item.getUserId(), item.getProductId());
         if (existing.isPresent()) {
@@ -76,7 +84,7 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public CartItem update(CartItem item) {
         jdbcTemplate.update("UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?", 
             item.getQuantity(), item.getCartItemId());
@@ -84,7 +92,7 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
     }
 
     @Override
-    @Transactional(readOnly = false)
+    @Transactional()
     public boolean delete(Integer cartItemId) {
         return jdbcTemplate.update("DELETE FROM cart_items WHERE cart_item_id = ?", cartItemId) > 0;
     }
@@ -101,11 +109,24 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
         return count != null && count > 0;
     }
 
+    /**
+     * Find by user id list.
+     *
+     * @param userId the user id
+     * @return the list
+     */
     public List<CartItem> findByUserId(int userId) {
         return jdbcTemplate.query("SELECT * FROM cart_items WHERE user_id = ? ORDER BY cart_item_id", 
             cartItemRowMapper, userId);
     }
 
+    /**
+     * Find by user and product optional.
+     *
+     * @param userId    the user id
+     * @param productId the product id
+     * @return the optional
+     */
     public Optional<CartItem> findByUserAndProduct(int userId, int productId) {
         String sql = "SELECT * FROM cart_items WHERE user_id = ? AND product_id = ?";
         try {
@@ -115,13 +136,14 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
         }
     }
 
-    @Transactional(readOnly = false)
+    /**
+     * Clear cart.
+     *
+     * @param userId the user id
+     */
+    @Transactional()
     public void clearCart(int userId) {
         jdbcTemplate.update("DELETE FROM cart_items WHERE user_id = ?", userId);
     }
 
-    public long countByUserId(int userId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cart_items WHERE user_id = ?", Long.class, userId);
-        return count != null ? count : 0L;
-    }
 }

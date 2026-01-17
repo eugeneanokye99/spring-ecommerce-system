@@ -5,15 +5,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+/**
+ * The type Product.
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Product implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private int productId;

@@ -1,7 +1,19 @@
 package com.shopjoy.entity;
 
+import lombok.Getter;
+
+/**
+ * The enum User type.
+ */
+@Getter
 public enum UserType {
+    /**
+     * Customer user type.
+     */
     CUSTOMER("Customer"),
+    /**
+     * Admin user type.
+     */
     ADMIN("Admin");
 
     private final String displayName;
@@ -10,10 +22,12 @@ public enum UserType {
         this.displayName = displayName;
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
+    /**
+     * From string user type.
+     *
+     * @param value the value
+     * @return the user type
+     */
     public static UserType fromString(String value) {
         if (value == null)
             return null;

@@ -1,5 +1,8 @@
 package com.shopjoy.exception;
 
+import lombok.Getter;
+
+@Getter
 public class InsufficientStockException extends BusinessException {
     
     private final int productId;
@@ -13,16 +16,5 @@ public class InsufficientStockException extends BusinessException {
         this.requestedQuantity = requestedQuantity;
         this.availableQuantity = availableQuantity;
     }
-    
-    public int getProductId() {
-        return productId;
-    }
-    
-    public int getRequestedQuantity() {
-        return requestedQuantity;
-    }
-    
-    public int getAvailableQuantity() {
-        return availableQuantity;
-    }
+
 }
