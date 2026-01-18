@@ -15,7 +15,7 @@ This document describes the GitHub Secrets required for the CI/CD pipeline to fu
 3. Click **New repository secret**
 4. Enter the following details:
    - **Name**: `TEST_DB_PASSWORD`
-   - **Value**: Your test database password (e.g., `Final@2025`)
+   - **Value**: Your secure test database password
 5. Click **Add secret**
 
 ## Security Best Practices
