@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration tests for User management
- * Tests the full stack: Controller -> Service -> Repository -> Database
+ * Service-layer integration tests: Service -> Repository -> Database
  */
 @SpringBootTest
 @ActiveProfiles("test")
