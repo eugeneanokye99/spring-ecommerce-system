@@ -30,7 +30,7 @@ public class Product implements Serializable {
     private String sku;
     private String brand;
     private String imageUrl;
-    private boolean isActive;
+    private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
