@@ -6,7 +6,6 @@ import com.shopjoy.dto.request.UpdateAddressRequest;
 import com.shopjoy.dto.response.AddressResponse;
 import com.shopjoy.entity.Address;
 import com.shopjoy.exception.ResourceNotFoundException;
-import com.shopjoy.exception.ValidationException;
 import com.shopjoy.repository.AddressRepository;
 import com.shopjoy.service.AddressService;
 import org.slf4j.Logger;
@@ -99,9 +98,8 @@ public class AddressServiceImpl implements AddressService {
         
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "id", addressId));
-        int userId = address.getUserId();
         
-        addressRepository.clearDefaultAddresses(userId);
+        addressRepository.clearDefaultAddresses(address.getUserId());
         Address updatedAddress = addressRepository.setDefaultAddress(addressId);
         return AddressMapper.toAddressResponse(updatedAddress);
     }
