@@ -3,9 +3,6 @@ package com.shopjoy.service;
 import com.shopjoy.dto.request.CreateCategoryRequest;
 import com.shopjoy.dto.request.UpdateCategoryRequest;
 import com.shopjoy.dto.response.CategoryResponse;
-import com.shopjoy.exception.DuplicateResourceException;
-import com.shopjoy.exception.ResourceNotFoundException;
-import com.shopjoy.exception.ValidationException;
 
 import java.util.List;
 
