@@ -51,6 +51,9 @@ class ProductIntegrationTest {
         testProductRequest.setProductName("Test Product " + System.currentTimeMillis());
         testProductRequest.setDescription("A test product for integration testing");
         testProductRequest.setPrice(99.99);
+        testProductRequest.setCostPrice(75.00);
+        testProductRequest.setSku("TEST-SKU-" + System.currentTimeMillis());
+        testProductRequest.setBrand("Test Brand");
         testProductRequest.setCategoryId(testCategoryId);
         testProductRequest.setImageUrl("https://example.com/image.jpg");
         testProductRequest.setIsActive(true);
@@ -111,6 +114,9 @@ class ProductIntegrationTest {
         secondProduct.setProductName("Second Product " + System.currentTimeMillis());
         secondProduct.setDescription("Another test product");
         secondProduct.setPrice(149.99);
+        secondProduct.setCostPrice(100.00);
+        secondProduct.setSku("SECOND-SKU-" + System.currentTimeMillis());
+        secondProduct.setBrand("Test Brand");
         secondProduct.setCategoryId(testCategoryId);
         secondProduct.setIsActive(true);
         productService.createProduct(secondProduct);
@@ -132,6 +138,9 @@ class ProductIntegrationTest {
         activeProduct.setProductName("Active Product " + System.currentTimeMillis());
         activeProduct.setDescription("Active product");
         activeProduct.setPrice(99.99);
+        activeProduct.setCostPrice(65.00);
+        activeProduct.setSku("ACTIVE-SKU-" + System.currentTimeMillis());
+        activeProduct.setBrand("Test Brand");
         activeProduct.setCategoryId(testCategoryId);
         activeProduct.setIsActive(true);
         productService.createProduct(activeProduct);
@@ -140,6 +149,9 @@ class ProductIntegrationTest {
         inactiveProduct.setProductName("Inactive Product " + System.currentTimeMillis());
         inactiveProduct.setDescription("Inactive product");
         inactiveProduct.setPrice(79.99);
+        inactiveProduct.setCostPrice(50.00);
+        inactiveProduct.setSku("INACTIVE-SKU-" + System.currentTimeMillis());
+        inactiveProduct.setBrand("Test Brand");
         inactiveProduct.setCategoryId(testCategoryId);
         inactiveProduct.setIsActive(false);
         productService.createProduct(inactiveProduct);

@@ -31,7 +31,11 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         product.setProductName(rs.getString("product_name"));
         product.setDescription(rs.getString("description"));
         product.setPrice(rs.getDouble("price"));
+        product.setCostPrice(rs.getDouble("cost_price"));
+        product.setSku(rs.getString("sku"));
+        product.setBrand(rs.getString("brand"));
         product.setImageUrl(rs.getString("image_url"));
+        product.setActive(rs.getBoolean("is_active"));
         product.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
         if (rs.getTimestamp("updated_at") != null) {
             product.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
@@ -53,8 +57,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         if (productId == null) return Optional.empty();
         
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, image_url,\s
-                       created_at, updated_at
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
                 FROM products WHERE product_id = ?
                \s""";
         
@@ -68,8 +72,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     @Override
     public List<Product> findAll() {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, image_url,\s
-                       created_at, updated_at
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
                 FROM products ORDER BY product_name
                \s""";
         return jdbcTemplate.query(sql, productRowMapper);
@@ -79,9 +83,9 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     @Transactional()
     public Product save(Product product) {
         String sql = """
-                INSERT INTO products (category_id, product_name, description, price, image_url,\s
-                                    created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO products (category_id, product_name, description, price, cost_price,
+                                    sku, brand, image_url, is_active, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 RETURNING product_id
                \s""";
         
@@ -92,9 +96,13 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
             ps.setString(2, product.getProductName());
             ps.setString(3, product.getDescription());
             ps.setDouble(4, product.getPrice());
-            ps.setString(5, product.getImageUrl());
-            ps.setObject(6, product.getCreatedAt());
-            ps.setObject(7, product.getUpdatedAt());
+            ps.setDouble(5, product.getCostPrice());
+            ps.setString(6, product.getSku());
+            ps.setString(7, product.getBrand());
+            ps.setString(8, product.getImageUrl());
+            ps.setBoolean(9, product.isActive());
+            ps.setObject(10, product.getCreatedAt());
+            ps.setObject(11, product.getUpdatedAt());
             return ps;
         }, keyHolder);
         
@@ -107,8 +115,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     public Product update(Product product) {
         String sql = """
                 UPDATE products\s
-                SET category_id = ?, product_name = ?, description = ?, price = ?,\s
-                    image_url = ?, updated_at = CURRENT_TIMESTAMP
+                SET category_id = ?, product_name = ?, description = ?, price = ?, cost_price = ?,
+                    sku = ?, brand = ?, image_url = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE product_id = ?
                \s""";
         
@@ -117,7 +125,11 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
                 product.getProductName(),
                 product.getDescription(),
                 product.getPrice(),
+                product.getCostPrice(),
+                product.getSku(),
+                product.getBrand(),
                 product.getImageUrl(),
+                product.isActive(),
                 product.getProductId());
         
         return product;
@@ -153,8 +165,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByCategoryId(Integer categoryId) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, image_url,\s
-                       created_at, updated_at
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
                 FROM products WHERE category_id = ? ORDER BY product_name
                \s""";
         return jdbcTemplate.query(sql, productRowMapper, categoryId);
@@ -168,8 +180,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByNameContaining(String keyword) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, image_url,\s
-                       created_at, updated_at
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
                 FROM products WHERE product_name ILIKE ? ORDER BY product_name
                \s""";
         return jdbcTemplate.query(sql, productRowMapper, "%" + keyword + "%");
@@ -184,8 +196,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByPriceRange(double minPrice, double maxPrice) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, image_url,\s
-                       created_at, updated_at
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
                 FROM products WHERE price BETWEEN ? AND ? ORDER BY price
                \s""";
         return jdbcTemplate.query(sql, productRowMapper, minPrice, maxPrice);

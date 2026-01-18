@@ -70,6 +70,9 @@ class OrderIntegrationTest {
         productRequest.setProductName("Order Product " + System.currentTimeMillis());
         productRequest.setDescription("Product for order testing");
         productRequest.setPrice(50.0);
+        productRequest.setCostPrice(35.0);
+        productRequest.setSku("ORDER-SKU-" + System.currentTimeMillis());
+        productRequest.setBrand("Test Brand");
         productRequest.setCategoryId(category.getCategoryId());
         productRequest.setIsActive(true);
         ProductResponse product = productService.createProduct(productRequest);
