@@ -1,6 +1,10 @@
 package com.shopjoy.repository;
 
+import com.shopjoy.dto.filter.ProductFilter;
 import com.shopjoy.entity.Product;
+import com.shopjoy.util.Page;
+import com.shopjoy.util.Pageable;
+import com.shopjoy.util.SortValidator;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -11,13 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * The type Product repository.
- */
 @Repository
 @Transactional(readOnly = true)
 public class ProductRepository implements GenericRepository<Product, Integer> {
@@ -214,5 +216,130 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         String sql = "SELECT COUNT(*) FROM products WHERE category_id = ?";
         Long count = jdbcTemplate.queryForObject(sql, Long.class, categoryId);
         return count != null ? count : 0L;
+    }
+    
+    public Page<Product> findAllPaginated(Pageable pageable, String sortBy, String sortDirection) {
+        String safeSort = SortValidator.getSafeProductSortField(sortBy);
+        String safeDirection = SortValidator.getSafeDirection(sortDirection);
+        
+        String sql = String.format("""
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
+                FROM products
+                ORDER BY %s %s
+                LIMIT ? OFFSET ?
+                """, safeSort, safeDirection);
+        
+        List<Product> products = jdbcTemplate.query(sql, productRowMapper, pageable.getSize(), pageable.getOffset());
+        long total = count();
+        
+        return new Page<>(products, pageable, total);
+    }
+    
+    public Page<Product> findProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy, String sortDirection) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
+                FROM products
+                WHERE 1=1
+                """);
+        
+        List<Object> params = new ArrayList<>();
+        buildFilterConditions(sql, filter, params);
+        
+        String safeSort = SortValidator.getSafeProductSortField(sortBy);
+        String safeDirection = SortValidator.getSafeDirection(sortDirection);
+        sql.append(String.format(" ORDER BY %s %s", safeSort, safeDirection));
+        sql.append(" LIMIT ? OFFSET ?");
+        
+        params.add(pageable.getSize());
+        params.add(pageable.getOffset());
+        
+        List<Product> products = jdbcTemplate.query(sql.toString(), productRowMapper, params.toArray());
+        long total = countProductsWithFilters(filter);
+        
+        return new Page<>(products, pageable, total);
+    }
+    
+    private void buildFilterConditions(StringBuilder sql, ProductFilter filter, List<Object> params) {
+        if (filter.getMinPrice() != null) {
+            sql.append(" AND price >= ?");
+            params.add(filter.getMinPrice());
+        }
+        
+        if (filter.getMaxPrice() != null) {
+            sql.append(" AND price <= ?");
+            params.add(filter.getMaxPrice());
+        }
+        
+        if (filter.getCategoryId() != null) {
+            sql.append(" AND category_id = ?");
+            params.add(filter.getCategoryId());
+        }
+        
+        if (filter.getSearchTerm() != null && !filter.getSearchTerm().trim().isEmpty()) {
+            sql.append(" AND (product_name ILIKE ? OR description ILIKE ?)");
+            String searchPattern = "%" + filter.getSearchTerm() + "%";
+            params.add(searchPattern);
+            params.add(searchPattern);
+        }
+        
+        if (filter.getIsActive() != null) {
+            sql.append(" AND is_active = ?");
+            params.add(filter.getIsActive());
+        }
+    }
+    
+    private long countProductsWithFilters(ProductFilter filter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+        buildFilterConditions(sql, filter, params);
+        
+        Long count = jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
+        return count != null ? count : 0L;
+    }
+    
+    public List<Product> searchProducts(String searchTerm) {
+        String sql = """
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
+                FROM products
+                WHERE product_name ILIKE ? OR description ILIKE ?
+                ORDER BY product_name
+                """;
+        String searchPattern = "%" + searchTerm + "%";
+        return jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern);
+    }
+    
+    public Page<Product> searchProductsPaginated(String searchTerm, Pageable pageable) {
+        String sql = """
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
+                FROM products
+                WHERE product_name ILIKE ? OR description ILIKE ?
+                ORDER BY product_name
+                LIMIT ? OFFSET ?
+                """;
+        String searchPattern = "%" + searchTerm + "%";
+        List<Product> products = jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern, pageable.getSize(), pageable.getOffset());
+        
+        String countSql = "SELECT COUNT(*) FROM products WHERE product_name ILIKE ? OR description ILIKE ?";
+        Long total = jdbcTemplate.queryForObject(countSql, Long.class, searchPattern, searchPattern);
+        
+        return new Page<>(products, pageable, total != null ? total : 0);
+    }
+    
+    public List<Product> findAllSorted(String sortBy, String sortDirection) {
+        String safeSort = SortValidator.getSafeProductSortField(sortBy);
+        String safeDirection = SortValidator.getSafeDirection(sortDirection);
+        
+        String sql = String.format("""
+                SELECT product_id, category_id, product_name, description, price, cost_price,
+                       sku, brand, image_url, is_active, created_at, updated_at
+                FROM products
+                ORDER BY %s %s
+                """, safeSort, safeDirection);
+        
+        return jdbcTemplate.query(sql, productRowMapper);
     }
 }

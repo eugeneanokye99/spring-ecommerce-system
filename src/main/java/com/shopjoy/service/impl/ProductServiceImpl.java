@@ -1,5 +1,6 @@
 package com.shopjoy.service.impl;
 
+import com.shopjoy.dto.filter.ProductFilter;
 import com.shopjoy.dto.mapper.ProductMapper;
 import com.shopjoy.dto.request.CreateProductRequest;
 import com.shopjoy.dto.request.UpdateProductRequest;
@@ -9,12 +10,19 @@ import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
 import com.shopjoy.repository.ProductRepository;
 import com.shopjoy.service.ProductService;
+import com.shopjoy.util.Page;
+import com.shopjoy.util.Pageable;
+import com.shopjoy.util.algorithm.BinarySearch;
+import com.shopjoy.util.algorithm.MergeSort;
+import com.shopjoy.util.algorithm.QuickSort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -200,6 +208,151 @@ public class ProductServiceImpl implements ProductService {
             throw new ValidationException("Category ID cannot be null");
         }
         return productRepository.countByCategory(categoryId);
+    }
+    
+    @Override
+    public Page<ProductResponse> getProductsPaginated(Pageable pageable, String sortBy, String sortDirection) {
+        logger.info("Fetching products with pagination: page={}, size={}, sortBy={}, sortDirection={}", 
+                pageable.getPage(), pageable.getSize(), sortBy, sortDirection);
+        
+        Page<Product> productPage = productRepository.findAllPaginated(pageable, sortBy, sortDirection);
+        
+        List<ProductResponse> responseList = productPage.getContent().stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+        
+        return new Page<>(
+                responseList,
+                productPage.getPageNumber(),
+                productPage.getPageSize(),
+                productPage.getTotalElements()
+        );
+    }
+    
+    @Override
+    public Page<ProductResponse> searchProductsPaginated(String keyword, Pageable pageable) {
+        logger.info("Searching products with term: '{}', page={}, size={}", 
+                keyword, pageable.getPage(), pageable.getSize());
+        
+        if (keyword == null || keyword.trim().isEmpty()) {
+            throw new ValidationException("Search keyword cannot be empty");
+        }
+        
+        Page<Product> productPage = productRepository.searchProductsPaginated(keyword, pageable);
+        
+        List<ProductResponse> responseList = productPage.getContent().stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+        
+        return new Page<>(
+                responseList,
+                productPage.getPageNumber(),
+                productPage.getPageSize(),
+                productPage.getTotalElements()
+        );
+    }
+    
+    @Override
+    public Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy, String sortDirection) {
+        logger.info("Fetching products with filters: minPrice={}, maxPrice={}, categoryId={}, searchTerm={}, page={}, size={}", 
+                filter.getMinPrice(), filter.getMaxPrice(), filter.getCategoryId(), 
+                filter.getSearchTerm(), pageable.getPage(), pageable.getSize());
+        
+        if (filter.getMinPrice() != null && filter.getMaxPrice() != null && 
+            filter.getMinPrice() > filter.getMaxPrice()) {
+            throw new ValidationException("minPrice", "must be less than or equal to maxPrice");
+        }
+        
+        Page<Product> productPage = productRepository.findProductsWithFilters(filter, pageable, sortBy, sortDirection);
+        
+        List<ProductResponse> responseList = productPage.getContent().stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+        
+        return new Page<>(
+                responseList,
+                productPage.getPageNumber(),
+                productPage.getPageSize(),
+                productPage.getTotalElements()
+        );
+    }
+    
+    @Override
+    public List<ProductResponse> getProductsSortedWithQuickSort(String sortBy, boolean ascending) {
+        logger.info("Fetching products sorted with QuickSort: sortBy={}, ascending={}", sortBy, ascending);
+        
+        List<Product> products = new ArrayList<>(productRepository.findAll());
+        
+        Comparator<Product> comparator = getProductComparator(sortBy, ascending);
+        
+        QuickSort.sort(products, comparator);
+        
+        logger.info("Successfully sorted {} products using QuickSort", products.size());
+        
+        return products.stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public List<ProductResponse> getProductsSortedWithMergeSort(String sortBy, boolean ascending) {
+        logger.info("Fetching products sorted with MergeSort: sortBy={}, ascending={}", sortBy, ascending);
+        
+        List<Product> products = new ArrayList<>(productRepository.findAll());
+        
+        Comparator<Product> comparator = getProductComparator(sortBy, ascending);
+        
+        MergeSort.sort(products, comparator);
+        
+        logger.info("Successfully sorted {} products using MergeSort", products.size());
+        
+        return products.stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public ProductResponse searchProductByIdWithBinarySearch(Integer productId) {
+        logger.info("Searching for product ID: {} using Binary Search", productId);
+        
+        if (productId == null || productId <= 0) {
+            throw new ValidationException("productId", "must be a positive integer");
+        }
+        
+        List<Product> allProducts = new ArrayList<>(productRepository.findAll());
+        
+        Comparator<Product> comparator = Comparator.comparing(Product::getProductId);
+        QuickSort.sort(allProducts, comparator);
+        
+        int index = BinarySearch.searchByProductId(allProducts, productId);
+        
+        if (index == -1) {
+            throw new ResourceNotFoundException("Product", "id", productId);
+        }
+        
+        Product product = allProducts.get(index);
+        logger.info("Found product using Binary Search: {}", product.getProductName());
+        
+        return ProductMapper.toProductResponse(product);
+    }
+    
+    private Comparator<Product> getProductComparator(String sortBy, boolean ascending) {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            sortBy = "product_id";
+        }
+        
+        Comparator<Product> comparator = switch (sortBy.toLowerCase()) {
+            case "product_id" -> Comparator.comparing(Product::getProductId);
+            case "product_name", "name" -> Comparator.comparing(Product::getProductName, String.CASE_INSENSITIVE_ORDER);
+            case "price" -> Comparator.comparing(Product::getPrice);
+            case "cost_price" -> Comparator.comparing(Product::getCostPrice);
+            case "created_at", "createdat" -> Comparator.comparing(Product::getCreatedAt);
+            case "updated_at", "updatedat" -> Comparator.comparing(Product::getUpdatedAt);
+            case "category_id" -> Comparator.comparing(Product::getCategoryId);
+            default -> throw new ValidationException("sortBy", "Invalid sort field: " + sortBy);
+        };
+        
+        return ascending ? comparator : comparator.reversed();
     }
     
     private void validateProductData(Product product) {

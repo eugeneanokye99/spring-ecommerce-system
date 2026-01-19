@@ -1,10 +1,13 @@
 package com.shopjoy.controller;
 
+import com.shopjoy.dto.filter.ProductFilter;
 import com.shopjoy.dto.request.CreateProductRequest;
 import com.shopjoy.dto.request.UpdateProductRequest;
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.ProductResponse;
 import com.shopjoy.service.ProductService;
+import com.shopjoy.util.Page;
+import com.shopjoy.util.Pageable;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * REST Controller for Product management.
- * Base path: /api/v1/products
- * THIN CONTROLLER: Only handles HTTP concerns. All business logic and DTO↔Entity mapping done by services.
- */
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
@@ -174,5 +172,78 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Long>> getProductCountByCategory(@PathVariable Integer categoryId) {
         long count = productService.getProductCountByCategory(categoryId);
         return ResponseEntity.ok(ApiResponse.success(count, "Product count by category retrieved successfully"));
+    }
+    
+    @GetMapping("/paginated")
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProductsPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "product_id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+        Pageable pageable = Pageable.of(page, size);
+        Page<ProductResponse> response = productService.getProductsPaginated(pageable, sortBy, sortDirection);
+        return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved with pagination"));
+    }
+    
+    @GetMapping("/search/paginated")
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> searchProductsPaginated(
+            @RequestParam String term,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = Pageable.of(page, size);
+        Page<ProductResponse> response = productService.searchProductsPaginated(term, pageable);
+        return ResponseEntity.ok(ApiResponse.success(response, "Product search completed with pagination"));
+    }
+    
+    @GetMapping("/filter")
+    public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProductsWithFilters(
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) Boolean inStock,
+            @RequestParam(required = false) Integer minStock,
+            @RequestParam(required = false) Integer maxStock,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "product_id") String sortBy,
+            @RequestParam(defaultValue = "ASC") String sortDirection) {
+        
+        ProductFilter filter = new ProductFilter();
+        filter.setMinPrice(minPrice);
+        filter.setMaxPrice(maxPrice);
+        filter.setCategoryId(categoryId);
+        filter.setSearchTerm(searchTerm);
+        filter.setInStock(inStock);
+        filter.setMinStock(minStock);
+        filter.setMaxStock(maxStock);
+        filter.setIsActive(isActive);
+        
+        Pageable pageable = Pageable.of(page, size);
+        Page<ProductResponse> response = productService.getProductsWithFilters(filter, pageable, sortBy, sortDirection);
+        return ResponseEntity.ok(ApiResponse.success(response, "Filtered products retrieved successfully"));
+    }
+    
+    @GetMapping("/sorted/quicksort")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsSortedWithQuickSort(
+            @RequestParam(defaultValue = "product_id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+        List<ProductResponse> response = productService.getProductsSortedWithQuickSort(sortBy, ascending);
+        return ResponseEntity.ok(ApiResponse.success(response, "Products sorted with QuickSort algorithm"));
+    }
+    
+    @GetMapping("/sorted/mergesort")
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsSortedWithMergeSort(
+            @RequestParam(defaultValue = "product_id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending) {
+        List<ProductResponse> response = productService.getProductsSortedWithMergeSort(sortBy, ascending);
+        return ResponseEntity.ok(ApiResponse.success(response, "Products sorted with MergeSort algorithm"));
+    }
+    
+    @GetMapping("/{id}/binary-search")
+    public ResponseEntity<ApiResponse<ProductResponse>> searchProductByIdWithBinarySearch(@PathVariable Integer id) {
+        ProductResponse response = productService.searchProductByIdWithBinarySearch(id);
+        return ResponseEntity.ok(ApiResponse.success(response, "Product found using Binary Search algorithm"));
     }
 }

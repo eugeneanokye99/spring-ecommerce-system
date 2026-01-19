@@ -1,126 +1,183 @@
 package com.shopjoy.service;
 
+import com.shopjoy.dto.filter.ProductFilter;
 import com.shopjoy.dto.request.CreateProductRequest;
 import com.shopjoy.dto.request.UpdateProductRequest;
 import com.shopjoy.dto.response.ProductResponse;
+import com.shopjoy.util.Page;
+import com.shopjoy.util.Pageable;
 
 import java.util.List;
 
 /**
- * Service interface for Product-related business operations.
- * DTO-FIRST DESIGN: All methods accept and return DTOs, not entities.
- * Service layer handles all DTO ↔ Entity mapping internally.
+ * The interface Product service.
  */
 public interface ProductService {
-    
+
     /**
-     * Creates a new product in the catalog.
-     * 
-     * @param request the product creation request DTO
-     * @return the created product response DTO
+     * Create product product response.
+     *
+     * @param request the request
+     * @return the product response
      */
     ProductResponse createProduct(CreateProductRequest request);
-    
+
     /**
-     * Retrieves a product by its ID.
-     * 
-     * @param productId the product ID
-     * @return the product response DTO
+     * Gets product by id.
+     *
+     * @param productId the product id
+     * @return the product by id
      */
     ProductResponse getProductById(Integer productId);
-    
+
     /**
-     * Retrieves all products in the catalog.
-     * 
-     * @return list of all product response DTOs
+     * Gets all products.
+     *
+     * @return the all products
      */
     List<ProductResponse> getAllProducts();
-    
+
     /**
-     * Retrieves all active products (available for sale).
-     * 
-     * @return list of active product response DTOs
+     * Gets active products.
+     *
+     * @return the active products
      */
     List<ProductResponse> getActiveProducts();
-    
+
     /**
-     * Retrieves all products in a specific category.
-     * 
-     * @param categoryId the category ID
-     * @return list of product response DTOs in the category
+     * Gets products by category.
+     *
+     * @param categoryId the category id
+     * @return the products by category
      */
     List<ProductResponse> getProductsByCategory(Integer categoryId);
-    
+
     /**
-     * Searches for products by name (case-insensitive partial match).
-     * 
-     * @param keyword the search keyword
-     * @return list of matching product response DTOs
+     * Search products by name list.
+     *
+     * @param keyword the keyword
+     * @return the list
      */
     List<ProductResponse> searchProductsByName(String keyword);
-    
+
     /**
-     * Finds products within a price range.
-     * 
-     * @param minPrice minimum price (inclusive)
-     * @param maxPrice maximum price (inclusive)
-     * @return list of product response DTOs within the price range
+     * Gets products by price range.
+     *
+     * @param minPrice the min price
+     * @param maxPrice the max price
+     * @return the products by price range
      */
     List<ProductResponse> getProductsByPriceRange(double minPrice, double maxPrice);
-    
+
     /**
-     * Updates an existing product's information.
-     * 
-     * @param productId the product ID
-     * @param request the update product request DTO
-     * @return the updated product response DTO
+     * Update product product response.
+     *
+     * @param productId the product id
+     * @param request   the request
+     * @return the product response
      */
     ProductResponse updateProduct(Integer productId, UpdateProductRequest request);
-    
+
     /**
-     * Updates a product's price.
-     * 
-     * @param productId the product ID
-     * @param newPrice the new price
-     * @return the updated product response DTO
+     * Update product price product response.
+     *
+     * @param productId the product id
+     * @param newPrice  the new price
+     * @return the product response
      */
     ProductResponse updateProductPrice(Integer productId, double newPrice);
-    
+
     /**
-     * Activates a product (makes it available for sale).
-     * 
-     * @param productId the product ID
-     * @return the updated product response DTO
+     * Activate product product response.
+     *
+     * @param productId the product id
+     * @return the product response
      */
     ProductResponse activateProduct(Integer productId);
-    
+
     /**
-     * Deactivates a product (removes from sale, but keeps in catalog).
-     * 
-     * @param productId the product ID
-     * @return the updated product response DTO
+     * Deactivate product product response.
+     *
+     * @param productId the product id
+     * @return the product response
      */
     ProductResponse deactivateProduct(Integer productId);
-    
+
     /**
-     * Deletes a product from the catalog.
-     * 
-     * @param productId the product ID
+     * Delete product.
+     *
+     * @param productId the product id
      */
     void deleteProduct(Integer productId);
-    
+
     /**
-     * Counts total number of products.
-     * 
-     * @return total product count
+     * Gets total product count.
+     *
+     * @return the total product count
      */
     long getTotalProductCount();
-    
+
     /**
-     * Counts products in a specific category.
-     * 
-     * @param categoryId the category ID
-     * @return product count in category
+     * Gets product count by category.
+     *
+     * @param categoryId the category id
+     * @return the product count by category
      */
     long getProductCountByCategory(Integer categoryId);
+
+    /**
+     * Gets products paginated.
+     *
+     * @param pageable      the pageable
+     * @param sortBy        the sort by
+     * @param sortDirection the sort direction
+     * @return the products paginated
+     */
+    Page<ProductResponse> getProductsPaginated(Pageable pageable, String sortBy, String sortDirection);
+
+    /**
+     * Search products paginated page.
+     *
+     * @param searchTerm the search term
+     * @param pageable   the pageable
+     * @return the page
+     */
+    Page<ProductResponse> searchProductsPaginated(String searchTerm, Pageable pageable);
+
+    /**
+     * Gets products with filters.
+     *
+     * @param filter        the filter
+     * @param pageable      the pageable
+     * @param sortBy        the sort by
+     * @param sortDirection the sort direction
+     * @return the products with filters
+     */
+    Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy, String sortDirection);
+
+    /**
+     * Gets products sorted with quick sort.
+     *
+     * @param sortBy    the sort by
+     * @param ascending the ascending
+     * @return the products sorted with quick sort
+     */
+    List<ProductResponse> getProductsSortedWithQuickSort(String sortBy, boolean ascending);
+
+    /**
+     * Gets products sorted with merge sort.
+     *
+     * @param sortBy    the sort by
+     * @param ascending the ascending
+     * @return the products sorted with merge sort
+     */
+    List<ProductResponse> getProductsSortedWithMergeSort(String sortBy, boolean ascending);
+
+    /**
+     * Search product by id with binary search product response.
+     *
+     * @param productId the product id
+     * @return the product response
+     */
+    ProductResponse searchProductByIdWithBinarySearch(Integer productId);
 }
