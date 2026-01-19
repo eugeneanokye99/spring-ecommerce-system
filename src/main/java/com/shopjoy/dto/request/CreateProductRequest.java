@@ -1,5 +1,6 @@
 package com.shopjoy.dto.request;
 
+import com.shopjoy.validation.ValidPrice;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +11,9 @@ import lombok.Setter;
 /**
  * Request DTO for creating a new product.
  * Clients send this when adding a new product to the catalog.
+ * 
+ * Uses custom validators:
+ * - @ValidPrice ensures price is positive with max 2 decimal places
  */
 @Setter
 @Getter
@@ -27,13 +31,14 @@ public class CreateProductRequest {
     private Integer categoryId;
     
     @NotNull(message = "Price is required")
-    @Positive(message = "Price must be positive")
+    @ValidPrice(message = "Price must be positive with at most 2 decimal places")
     private Double price;
     
-    @Positive(message = "Cost price must be positive")
+    @ValidPrice(allowNull = true, message = "Cost price must be positive with at most 2 decimal places")
     private Double costPrice;
     
-    @Size(max = 100, message = "SKU cannot exceed 100 characters")
+    @NotBlank(message = "SKU is required")
+    @Size(min = 3, max = 100, message = "SKU must be between 3 and 100 characters")
     private String sku;
     
     @Size(max = 100, message = "Brand cannot exceed 100 characters")
@@ -44,9 +49,6 @@ public class CreateProductRequest {
     
     private Boolean isActive = true;
 
-    /**
-     * Instantiates a new Create product request.
-     */
     public CreateProductRequest() {
     }
 

@@ -9,12 +9,23 @@ import com.shopjoy.service.ProductService;
 import com.shopjoy.util.Page;
 import com.shopjoy.util.Pageable;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST Controller for Product management with comprehensive validation.
+ * Base path: /api/v1/products
+ * 
+ * @Validated enables method-level validation for @PathVariable and @RequestParam
+ */
+@Validated
 @RestController
 @RequestMapping("/api/v1/products")
 public class ProductController {
@@ -25,10 +36,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    /**
-     * Create a new product.
-     * POST /api/v1/products
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody CreateProductRequest request) {
@@ -37,12 +44,9 @@ public class ProductController {
                 .body(ApiResponse.success(response, "Product created successfully"));
     }
 
-    /**
-     * Get product by ID.
-     * GET /api/v1/products/{id}
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<ProductResponse>> getProductById(
+            @PathVariable @Positive(message = "Product ID must be positive") Integer id) {
         ProductResponse response = productService.getProductById(id);
         return ResponseEntity.ok(ApiResponse.success(response, "Product retrieved successfully"));
     }
@@ -94,8 +98,8 @@ public class ProductController {
      */
     @GetMapping("/price-range")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByPriceRange(
-            @RequestParam Double minPrice,
-            @RequestParam Double maxPrice) {
+            @RequestParam @Min(value = 0, message = "Minimum price cannot be negative") Double minPrice,
+            @RequestParam @Min(value = 0, message = "Maximum price cannot be negative") Double maxPrice) {
         List<ProductResponse> response = productService.getProductsByPriceRange(minPrice, maxPrice);
         return ResponseEntity.ok(ApiResponse.success(response, "Products by price range retrieved successfully"));
     }
@@ -106,7 +110,7 @@ public class ProductController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
-            @PathVariable Integer id,
+            @PathVariable @Positive(message = "Product ID must be positive") Integer id,
             @Valid @RequestBody UpdateProductRequest request) {
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(ApiResponse.success(response, "Product updated successfully"));
@@ -176,8 +180,8 @@ public class ProductController {
     
     @GetMapping("/paginated")
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> getProductsPaginated(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page number cannot be negative") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int size,
             @RequestParam(defaultValue = "product_id") String sortBy,
             @RequestParam(defaultValue = "ASC") String sortDirection) {
         Pageable pageable = Pageable.of(page, size);
@@ -188,8 +192,8 @@ public class ProductController {
     @GetMapping("/search/paginated")
     public ResponseEntity<ApiResponse<Page<ProductResponse>>> searchProductsPaginated(
             @RequestParam String term,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Page number cannot be negative") int page,
+            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Page size must be at least 1") @Max(value = 100, message = "Page size cannot exceed 100") int size) {
         Pageable pageable = Pageable.of(page, size);
         Page<ProductResponse> response = productService.searchProductsPaginated(term, pageable);
         return ResponseEntity.ok(ApiResponse.success(response, "Product search completed with pagination"));

@@ -11,10 +11,16 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * The type Performance comparison.
+ */
 public class PerformanceComparison {
     
     private static final Logger logger = LoggerFactory.getLogger(PerformanceComparison.class);
 
+    /**
+     * The type Sorting result.
+     */
     public record SortingResult(String algorithm, long executionTimeMs, int dataSize) {
 
         @Override
@@ -23,6 +29,9 @@ public class PerformanceComparison {
             }
         }
 
+    /**
+     * The type Search result.
+     */
     public record SearchResult(String algorithm, long executionTimeMs, boolean found, int dataSize) {
 
         @Override
@@ -31,7 +40,14 @@ public class PerformanceComparison {
                         algorithm, executionTimeMs, found, dataSize);
             }
         }
-    
+
+    /**
+     * Compare sorting algorithms list.
+     *
+     * @param products  the products
+     * @param sortField the sort field
+     * @return the list
+     */
     public static List<SortingResult> compareSortingAlgorithms(List<Product> products, String sortField) {
         List<SortingResult> results = new ArrayList<>();
         Comparator<Product> comparator = getComparator(sortField);
@@ -54,7 +70,14 @@ public class PerformanceComparison {
         
         return results;
     }
-    
+
+    /**
+     * Compare linear search search result.
+     *
+     * @param products the products
+     * @param targetId the target id
+     * @return the search result
+     */
     public static SearchResult compareLinearSearch(List<Product> products, Integer targetId) {
         logger.info("Starting linear search performance comparison for {} products", products.size());
         
@@ -73,7 +96,14 @@ public class PerformanceComparison {
         
         return result;
     }
-    
+
+    /**
+     * Compare binary search search result.
+     *
+     * @param products the products
+     * @param targetId the target id
+     * @return the search result
+     */
     public static SearchResult compareBinarySearch(List<Product> products, Integer targetId) {
         logger.info("Starting binary search performance comparison for {} products", products.size());
         
@@ -90,8 +120,16 @@ public class PerformanceComparison {
         
         return result;
     }
-    
-    public static String generatePerformanceReport(List<SortingResult> sortingResults, 
+
+    /**
+     * Generate performance report string.
+     *
+     * @param sortingResults the sorting results
+     * @param linearSearch   the linear search
+     * @param binarySearch   the binary search
+     * @return the string
+     */
+    public static String generatePerformanceReport(List<SortingResult> sortingResults,
                                                      SearchResult linearSearch, 
                                                      SearchResult binarySearch) {
         StringBuilder report = new StringBuilder();

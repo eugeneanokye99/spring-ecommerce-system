@@ -2,6 +2,9 @@ package com.shopjoy.util;
 
 import lombok.Getter;
 
+/**
+ * The type Pageable.
+ */
 @Getter
 public class Pageable {
     
@@ -12,7 +15,13 @@ public class Pageable {
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 10;
     private static final int MAX_SIZE = 100;
-    
+
+    /**
+     * Instantiates a new Pageable.
+     *
+     * @param page the page
+     * @param size the size
+     */
     public Pageable(Integer page, Integer size) {
         this.page = page != null && page >= 0 ? page : DEFAULT_PAGE;
         this.size = calculateSize(size);
@@ -26,6 +35,13 @@ public class Pageable {
         return Math.min(size, MAX_SIZE);
     }
 
+    /**
+     * Of pageable.
+     *
+     * @param page the page
+     * @param size the size
+     * @return the pageable
+     */
     public static Pageable of(Integer page, Integer size) {
         return new Pageable(page, size);
     }
