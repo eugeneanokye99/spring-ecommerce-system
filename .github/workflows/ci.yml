@@ -21,7 +21,7 @@ jobs:
         env:
           POSTGRES_DB: shopjoy_test
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: Final@2025
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -67,7 +67,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: test
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/shopjoy_test
           SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: Final@2025
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
 
       - name: Run integration tests
         run: ./mvnw verify -Dspring.profiles.active=test
@@ -75,7 +75,7 @@ jobs:
           SPRING_PROFILES_ACTIVE: test
           SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/shopjoy_test
           SPRING_DATASOURCE_USERNAME: postgres
-          SPRING_DATASOURCE_PASSWORD: Final@2025
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
 
       - name: Generate test report
         if: always()
