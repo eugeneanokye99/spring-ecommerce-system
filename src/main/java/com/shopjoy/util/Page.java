@@ -1,23 +1,33 @@
 package com.shopjoy.util;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.List;
 
-/**
- * The type Page.
- *
- * @param <T> the type parameter
- */
+@Schema(description = "Paginated response wrapper containing page content and metadata")
 @Getter
 public class Page<T> {
 
+    @Schema(description = "List of items in the current page")
     private final List<T> content;
+    
+    @Schema(description = "Current page number (0-indexed)", example = "0")
     private final int pageNumber;
+    
+    @Schema(description = "Number of items per page", example = "10")
     private final int pageSize;
+    
+    @Schema(description = "Total number of items across all pages", example = "100")
     private final long totalElements;
+    
+    @Schema(description = "Total number of pages", example = "10")
     private final int totalPages;
+    
+    @Schema(description = "Whether this is the first page", example = "true")
     private final boolean first;
+    
+    @Schema(description = "Whether this is the last page", example = "false")
     private final boolean last;
 
     /**

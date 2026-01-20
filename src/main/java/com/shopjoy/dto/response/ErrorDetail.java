@@ -1,38 +1,28 @@
 package com.shopjoy.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Represents a single validation or business error detail.
- * Used to provide detailed information about what went wrong.
- */
+@Schema(description = "Detailed error information for validation or business rule violations")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ErrorDetail {
     
-    /**
-     * The field that caused the error (e.g., "email", "price")
-     */
+    @Schema(description = "Field name that caused the error", example = "email")
     private String field;
     
-    /**
-     * Human-readable error message
-     */
+    @Schema(description = "Human-readable error message", example = "Email must be valid")
     private String message;
     
-    /**
-     * The value that was rejected (can be null)
-     */
+    @Schema(description = "The value that was rejected", example = "invalid-email")
     private Object rejectedValue;
     
-    /**
-     * Machine-readable error code (e.g., "REQUIRED", "INVALID_FORMAT")
-     */
+    @Schema(description = "Machine-readable error code", example = "INVALID_FORMAT")
     private String errorCode;
     
     /**

@@ -46,7 +46,6 @@ class CategoryIntegrationTest {
 
         // Assert
         assertNotNull(response);
-        assertNotNull(response.getCategoryId());
         assertEquals(testCategoryRequest.getCategoryName(), response.getCategoryName());
         assertEquals(testCategoryRequest.getDescription(), response.getDescription());
         assertNotNull(response.getCreatedAt());

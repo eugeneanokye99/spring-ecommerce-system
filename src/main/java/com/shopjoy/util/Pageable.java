@@ -1,15 +1,19 @@
 package com.shopjoy.util;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
-/**
- * The type Pageable.
- */
+@Schema(description = "Pagination request parameters")
 @Getter
 public class Pageable {
     
+    @Schema(description = "Page number (0-indexed)", example = "0")
     private final int page;
+    
+    @Schema(description = "Number of items per page", example = "10")
     private final int size;
+    
+    @Schema(description = "Number of items to skip", example = "0")
     private final int offset;
     
     private static final int DEFAULT_PAGE = 0;

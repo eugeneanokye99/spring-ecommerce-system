@@ -1,25 +1,23 @@
 package com.shopjoy.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Request DTO for updating an existing category.
- */
+@Schema(description = "Request for updating category details - all fields are optional")
 @Setter
 @Getter
 public class UpdateCategoryRequest {
     
+    @Schema(description = "Updated category name", example = "Gaming Laptops")
     @Size(min = 2, max = 100, message = "Category name must be between 2 and 100 characters")
     private String categoryName;
     
+    @Schema(description = "Updated category description", example = "High-performance laptops for gaming and creative work")
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    /**
-     * Instantiates a new Update category request.
-     */
     public UpdateCategoryRequest() {
     }
 

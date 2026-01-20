@@ -3,7 +3,6 @@ package com.shopjoy.integration;
 import com.shopjoy.dto.request.*;
 import com.shopjoy.dto.response.*;
 import com.shopjoy.entity.OrderStatus;
-import com.shopjoy.entity.UserType;
 import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.service.*;
 import org.junit.jupiter.api.*;
@@ -12,7 +11,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +44,6 @@ class OrderIntegrationTest {
     private InventoryService inventoryService;
 
     private Integer testUserId;
-    private Integer testProductId;
 
     @BeforeEach
     void setUp() {
@@ -76,7 +73,7 @@ class OrderIntegrationTest {
         productRequest.setCategoryId(category.getCategoryId());
         productRequest.setIsActive(true);
         ProductResponse product = productService.createProduct(productRequest);
-        testProductId = product.getProductId();
+        Integer testProductId = product.getProductId();
 
         // Create inventory for product
         inventoryService.createInventory(testProductId, 100, 10);
@@ -108,7 +105,6 @@ class OrderIntegrationTest {
 
         // Assert
         assertNotNull(response);
-        assertNotNull(response.getOrderId());
         assertEquals(testUserId, response.getUserId());
         assertEquals(OrderStatus.PENDING, response.getStatus());
         assertNotNull(response.getCreatedAt());

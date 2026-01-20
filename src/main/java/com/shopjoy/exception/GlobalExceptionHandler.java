@@ -2,8 +2,6 @@ package com.shopjoy.exception;
 
 import com.shopjoy.dto.response.ApiResponse;
 import com.shopjoy.dto.response.ErrorDetail;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -15,16 +13,13 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Global exception handler that catches all exceptions thrown in the application
  * and converts them to consistent API responses with appropriate HTTP status codes.
- * 
  * This class ensures:
  * - Consistent error response format across the entire API
  * - Appropriate HTTP status codes for different error types
@@ -66,35 +61,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
-    /**
-     * Handles validation errors on @PathVariable and @RequestParam annotations.
-     * Returns 400 Bad Request.
-     * Example: When @Positive is on @PathVariable Integer id but client sends -1
-     */
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiResponse<Object>> handleConstraintViolation(ConstraintViolationException ex) {
-        logger.warn("Constraint violation: {}", ex.getMessage());
-        
-        List<ErrorDetail> errors = ex.getConstraintViolations().stream()
-                .map(violation -> {
-                    String propertyPath = getPropertyName(violation.getPropertyPath().toString());
-                    return new ErrorDetail(
-                            propertyPath,
-                            violation.getMessage(),
-                            violation.getInvalidValue(),
-                            "CONSTRAINT_VIOLATION"
-                    );
-                })
-                .collect(Collectors.toList());
-        
-        ApiResponse<Object> response = ApiResponse.validationError(
-                "Request parameter validation failed",
-                errors
-        );
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-    
+
     /**
      * Handles ResourceNotFoundException - when entity not found by ID.
      * Returns 404 Not Found.
@@ -215,7 +182,6 @@ public class GlobalExceptionHandler {
     /**
      * Handles malformed JSON requests.
      * Returns 400 Bad Request.
-     * 
      * Example: Invalid JSON syntax, missing quotes, wrong data type
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -241,31 +207,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
     
-    /**
-     * Handles type mismatch errors for path variables and request parameters.
-     * Returns 400 Bad Request.
-     * Example: Expecting Integer but got "abc"
-     */
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Object>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        logger.warn("Type mismatch: {}", ex.getMessage());
-        
-        String message = String.format("Invalid value '%s' for parameter '%s'. Expected type: %s",
-                ex.getValue(),
-                ex.getName(),
-                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
-        
-        ErrorDetail error = new ErrorDetail(
-                ex.getName(),
-                message,
-                ex.getValue(),
-                "TYPE_MISMATCH"
-        );
-        
-        ApiResponse<Object> response = ApiResponse.error(message, error);
-        
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
+
     
     /**
      * Handles database constraint violations (unique constraints, foreign key violations, etc.).
@@ -341,16 +283,5 @@ public class GlobalExceptionHandler {
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
-    
-    /**
-     * Extracts the property name from a constraint violation property path.
-     * Example: "updateProduct.productId" -> "productId"
-     */
-    private String getPropertyName(String propertyPath) {
-        if (propertyPath == null) {
-            return "unknown";
-        }
-        String[] parts = propertyPath.split("\\.");
-        return parts.length > 0 ? parts[parts.length - 1] : propertyPath;
-    }
+
 }

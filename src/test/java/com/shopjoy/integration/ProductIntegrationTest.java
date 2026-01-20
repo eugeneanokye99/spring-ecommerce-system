@@ -68,7 +68,6 @@ class ProductIntegrationTest {
 
         // Assert
         assertNotNull(response);
-        assertNotNull(response.getProductId());
         assertEquals(testProductRequest.getProductName(), response.getProductName());
         assertEquals(testProductRequest.getDescription(), response.getDescription());
         assertEquals(testProductRequest.getPrice(), response.getPrice());

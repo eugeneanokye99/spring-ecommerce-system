@@ -11,12 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -53,7 +48,7 @@ class GlobalExceptionHandlerTest {
         assertNotNull(response.getBody().getErrors());
         assertEquals(1, response.getBody().getErrors().size());
         
-        ErrorDetail error = response.getBody().getErrors().get(0);
+        ErrorDetail error = response.getBody().getErrors().getFirst();
         assertEquals("productName", error.getField());
         assertEquals("must not be blank", error.getMessage());
     }
@@ -238,8 +233,10 @@ class GlobalExceptionHandlerTest {
         
         ResponseEntity<ApiResponse<Object>> notFoundResponse = handler.handleResourceNotFound(notFoundEx);
         ResponseEntity<ApiResponse<Object>> validationResponse = handler.handleBusinessValidation(validationEx);
-        
+
+        assert notFoundResponse.getBody() != null;
         assertFalse(notFoundResponse.getBody().isSuccess());
+        assert validationResponse.getBody() != null;
         assertFalse(validationResponse.getBody().isSuccess());
     }
 }

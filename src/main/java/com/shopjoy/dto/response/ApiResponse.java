@@ -1,5 +1,6 @@
 package com.shopjoy.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,27 +9,26 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Generic wrapper for all API responses.
- * This ensures all API responses have a consistent structure.
- * <p>
- * Example usage:
- * - Success: ApiResponse.success(userResponse, "User created successfully")
- * - Error: ApiResponse.error("User not found")
- * - Validation Error: ApiResponse.validationError("Validation failed", errorList)
- *
- * @param <T> the type parameter
- */
+@Schema(description = "Generic wrapper for all API responses ensuring consistent structure")
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ApiResponse<T> {
 
+    @Schema(description = "Indicates if the request was successful", example = "true")
     private boolean success;
+    
+    @Schema(description = "Human-readable response message", example = "Product created successfully")
     private String message;
+    
+    @Schema(description = "Response payload data")
     private T data;
+    
+    @Schema(description = "List of error details if request failed")
     private List<ErrorDetail> errors;
+    
+    @Schema(description = "Timestamp when the response was generated", example = "2024-01-20T10:30:00")
     private LocalDateTime timestamp;
 
     /**

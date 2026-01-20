@@ -1,34 +1,31 @@
 package com.shopjoy.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Request DTO for updating an existing user.
- * All fields are optional - only send fields you want to update.
- * NOTE: Username and password are NOT included here - use separate endpoints for those.
- */
+@Schema(description = "Request for updating user profile - all fields are optional")
 @Setter
 @Getter
 public class UpdateUserRequest {
 
-
+    @Schema(description = "Updated email address", example = "john.newemail@example.com")
     @Email(message = "Email must be valid")
     private String email;
     
+    @Schema(description = "Updated first name", example = "John")
     @Size(max = 50, message = "First name cannot exceed 50 characters")
     private String firstName;
     
+    @Schema(description = "Updated last name", example = "Doe")
     @Size(max = 50, message = "Last name cannot exceed 50 characters")
     private String lastName;
     
+    @Schema(description = "Updated phone number", example = "+1987654321")
     private String phone;
 
-    /**
-     * Instantiates a new Update user request.
-     */
     public UpdateUserRequest() {
     }
 
