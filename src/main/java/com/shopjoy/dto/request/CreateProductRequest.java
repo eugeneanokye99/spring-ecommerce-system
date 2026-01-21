@@ -6,12 +6,18 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Schema(description = "Request for creating a new product with all required details")
 @Setter
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateProductRequest {
 
     @Schema(description = "Product name", example = "Dell XPS 15 Laptop", required = true)
@@ -53,7 +59,6 @@ public class CreateProductRequest {
     @Schema(description = "Whether the product is active and available for sale", example = "true", defaultValue = "true")
     private Boolean isActive = true;
 
-    public CreateProductRequest() {
-    }
+
 
 }

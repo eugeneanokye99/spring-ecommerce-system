@@ -3,12 +3,14 @@ package com.shopjoy.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "Request for updating an existing product - all fields are optional")
 @Setter
 @Getter
+@Builder
 public class UpdateProductRequest {
 
     @Schema(description = "Updated product name", example = "Dell XPS 15 Laptop (2024 Edition)")
@@ -38,7 +40,6 @@ public class UpdateProductRequest {
     @Schema(description = "Updated active status", example = "false")
     private Boolean isActive;
 
-    public UpdateProductRequest() {
-    }
+  
 
 }

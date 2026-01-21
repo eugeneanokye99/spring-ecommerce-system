@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
 public class CreateAddressRequest {
     
     @NotNull(message = "User ID is required")
@@ -44,10 +46,5 @@ public class CreateAddressRequest {
     
     private Boolean isDefault = false;
 
-    /**
-     * Instantiates a new Create address request.
-     */
-    public CreateAddressRequest() {
-    }
 
 }

@@ -2,12 +2,14 @@ package com.shopjoy.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "Request for updating category details - all fields are optional")
 @Setter
 @Getter
+@Builder
 public class UpdateCategoryRequest {
     
     @Schema(description = "Updated category name", example = "Gaming Laptops")
@@ -18,7 +20,6 @@ public class UpdateCategoryRequest {
     @Size(max = 500, message = "Description cannot exceed 500 characters")
     private String description;
 
-    public UpdateCategoryRequest() {
-    }
+   
 
 }

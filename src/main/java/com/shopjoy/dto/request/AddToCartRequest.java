@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,6 +13,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
 public class AddToCartRequest {
     
     @NotNull(message = "User ID is required")
@@ -27,10 +29,6 @@ public class AddToCartRequest {
     @Max(value = 999, message = "Quantity cannot exceed 999")
     private Integer quantity;
 
-    /**
-     * Instantiates a new Add to cart request.
-     */
-    public AddToCartRequest() {
-    }
+
 
 }

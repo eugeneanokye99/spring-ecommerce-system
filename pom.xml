@@ -79,6 +79,13 @@
 			<artifactId>spring-boot-starter-graphql</artifactId>
 		</dependency>
 
+		<!-- GraphQL Extended Scalars -->
+		<dependency>
+			<groupId>com.graphql-java</groupId>
+			<artifactId>graphql-java-extended-scalars</artifactId>
+			<version>21.0</version>
+		</dependency>
+
 		<!-- OpenAPI/Swagger -->
 		<!-- Source: https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui -->
 		<dependency>

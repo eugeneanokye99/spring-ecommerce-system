@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "Request for user registration with all required account details")
 @Setter
 @Getter
+@Builder
 public class CreateUserRequest {
 
     @Schema(description = "Unique username for login", example = "johndoe123", required = true)
@@ -40,7 +42,6 @@ public class CreateUserRequest {
     @Schema(description = "User phone number", example = "+1234567890")
     private String phone;
 
-    public CreateUserRequest() {
-    }
+    
 
 }
