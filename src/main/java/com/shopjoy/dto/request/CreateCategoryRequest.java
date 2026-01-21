@@ -4,12 +4,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "Request for creating a new category with optional parent for hierarchical structure")
 @Setter
 @Getter
+@Builder
 public class CreateCategoryRequest {
     
     @Schema(description = "Category name", example = "Laptops", required = true)
@@ -25,7 +27,6 @@ public class CreateCategoryRequest {
     @Positive(message = "Parent category ID must be positive")
     private Integer parentCategoryId;
 
-    public CreateCategoryRequest() {
-    }
+   
 
 }

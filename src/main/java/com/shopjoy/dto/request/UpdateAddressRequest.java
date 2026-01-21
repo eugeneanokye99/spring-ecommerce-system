@@ -2,6 +2,7 @@ package com.shopjoy.dto.request;
 
 import com.shopjoy.entity.AddressType;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
 public class UpdateAddressRequest {
     
     private AddressType addressType;
@@ -31,10 +33,5 @@ public class UpdateAddressRequest {
     
     private Boolean isDefault;
 
-    /**
-     * Instantiates a new Update address request.
-     */
-    public UpdateAddressRequest() {
-    }
 
 }

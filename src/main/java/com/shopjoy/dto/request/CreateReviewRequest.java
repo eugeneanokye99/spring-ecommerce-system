@@ -1,6 +1,7 @@
 package com.shopjoy.dto.request;
 
 import jakarta.validation.constraints.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
 public class CreateReviewRequest {
     
     @NotNull(message = "User ID is required")
@@ -31,10 +33,6 @@ public class CreateReviewRequest {
     @Size(max = 1000, message = "Comment cannot exceed 1000 characters")
     private String comment;
 
-    /**
-     * Instantiates a new Create review request.
-     */
-    public CreateReviewRequest() {
-    }
+ 
 
 }

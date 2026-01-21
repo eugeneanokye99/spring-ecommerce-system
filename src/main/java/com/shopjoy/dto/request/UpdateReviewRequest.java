@@ -3,6 +3,7 @@ package com.shopjoy.dto.request;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +12,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
+@Builder
 public class UpdateReviewRequest {
     
     @Min(value = 1, message = "Rating must be at least 1")
@@ -22,11 +24,5 @@ public class UpdateReviewRequest {
     
     @Size(max = 1000, message = "Comment cannot exceed 1000 characters")
     private String comment;
-
-    /**
-     * Instantiates a new Update review request.
-     */
-    public UpdateReviewRequest() {
-    }
 
 }

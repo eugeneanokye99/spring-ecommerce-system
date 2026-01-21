@@ -3,12 +3,14 @@ package com.shopjoy.dto.request;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Schema(description = "Request for updating user profile - all fields are optional")
 @Setter
 @Getter
+@Builder
 public class UpdateUserRequest {
 
     @Schema(description = "Updated email address", example = "john.newemail@example.com")
@@ -26,7 +28,6 @@ public class UpdateUserRequest {
     @Schema(description = "Updated phone number", example = "+1987654321")
     private String phone;
 
-    public UpdateUserRequest() {
-    }
+
 
 }

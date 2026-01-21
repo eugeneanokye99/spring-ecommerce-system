@@ -13,6 +13,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,33 @@ import java.util.List;
 public class GlobalExceptionHandler {
     
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-    
+
+
+    /**
+     * Handles missing static resources (favicon, browser dev tools requests, etc.).
+     * Suppresses logging for common browser-generated requests.
+     * Returns 404 Not Found without logging noise.
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResourceFound(
+            NoResourceFoundException ex,
+            HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        // Suppress common browser requests that aren't actual errors
+        if (path.contains("favicon.ico") ||
+                path.contains(".well-known") ||
+                path.contains("graphiql")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        // Log actual missing resources
+        logger.warn("Resource not found: {}", path);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+
     /**
      * Handles validation errors from @Valid annotation on request DTOs.
      * Returns 400 Bad Request with detailed field-level error information.

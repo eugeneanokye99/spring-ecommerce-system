@@ -1,0 +1,272 @@
+scalar DateTime
+
+type User {
+    userId: Int!
+    username: String!
+    email: String!
+    firstName: String
+    lastName: String
+    phone: String
+    userType: String!
+    createdAt: DateTime!
+}
+
+type Product {
+    productId: Int!
+    productName: String!
+    description: String
+    price: Float!
+    categoryId: Int
+    category: Category
+    createdAt: DateTime!
+}
+
+type Category {
+    categoryId: Int!
+    categoryName: String!
+    description: String
+    parentCategoryId: Int
+    parentCategory: Category
+    products: [Product]
+    createdAt: DateTime!
+}
+
+type Order {
+    orderId: Int!
+    userId: Int!
+    user: User
+    totalAmount: Float!
+    status: String!
+    paymentStatus: String!
+    orderDate: DateTime!
+}
+
+type CartItem {
+    cartItemId: Int!
+    userId: Int!
+    productId: Int!
+    product: Product
+    quantity: Int!
+    addedAt: DateTime!
+}
+
+type Review {
+    reviewId: Int!
+    productId: Int!
+    product: Product
+    userId: Int!
+    user: User
+    rating: Int!
+    comment: String
+    createdAt: DateTime!
+}
+
+type Address {
+    addressId: Int!
+    userId: Int!
+    addressType: String!
+    streetAddress: String!
+    city: String!
+    state: String!
+    postalCode: String!
+    country: String!
+    isDefault: Boolean!
+    createdAt: DateTime!
+}
+
+type Inventory {
+    inventoryId: Int!
+    productId: Int!
+    product: Product
+    stockQuantity: Int!
+    reservedQuantity: Int!
+    reorderLevel: Int!
+    lastRestocked: DateTime
+}
+
+input CreateUserInput {
+    username: String!
+    email: String!
+    password: String!
+    firstName: String
+    lastName: String
+    phone: String
+    userType: String!
+}
+
+input UpdateUserInput {
+    username: String
+    email: String
+    firstName: String
+    lastName: String
+    phone: String
+}
+
+input CreateProductInput {
+    name: String!
+    description: String
+    price: Float!
+    stockQuantity: Int!
+    categoryId: ID
+}
+
+input UpdateProductInput {
+    name: String
+    description: String
+    price: Float
+    stockQuantity: Int
+    categoryId: ID
+}
+
+input CreateCategoryInput {
+    name: String!
+    description: String
+    parentCategoryId: ID
+}
+
+input UpdateCategoryInput {
+    name: String
+    description: String
+    parentCategoryId: ID
+}
+
+input CreateOrderInput {
+    userId: ID!
+    orderItems: [OrderItemInput!]!
+}
+
+input OrderItemInput {
+    productId: ID!
+    quantity: Int!
+    price: Float!
+}
+
+input CreateReviewInput {
+    productId: ID!
+    userId: ID!
+    rating: Int!
+    comment: String
+}
+
+input UpdateReviewInput {
+    rating: Int
+    comment: String
+}
+
+input CreateAddressInput {
+    userId: ID!
+    addressType: String!
+    street: String!
+    city: String!
+    state: String!
+    postalCode: String!
+    country: String!
+    isDefault: Boolean
+}
+
+input UpdateAddressInput {
+    street: String
+    city: String
+    state: String
+    postalCode: String
+    country: String
+    addressType: String
+}
+
+input ProductFilterInput {
+    minPrice: Float
+    maxPrice: Float
+    categoryId: ID
+    searchTerm: String
+    inStock: Boolean
+}
+
+input UserFilterInput {
+    userType: String
+    searchTerm: String
+}
+
+type UserConnection {
+    users: [User]
+    pageInfo: PageInfo
+}
+
+type ProductConnection {
+    products: [Product]
+    pageInfo: PageInfo
+}
+
+type OrderConnection {
+    orders: [Order]
+    pageInfo: PageInfo
+}
+
+type ReviewConnection {
+    reviews: [Review]
+    pageInfo: PageInfo
+}
+
+type PageInfo {
+    page: Int!
+    size: Int!
+    totalElements: Int!
+    totalPages: Int!
+}
+
+type Query {
+    user(id: ID!): User
+    users(filter: UserFilterInput, page: Int, size: Int): UserConnection
+    
+    product(id: ID!): Product
+    products(filter: ProductFilterInput, page: Int, size: Int, sortBy: String, sortDirection: String): ProductConnection
+    
+    category(id: ID!): Category
+    categories: [Category]
+    
+    order(id: ID!): Order
+    orders(userId: ID, page: Int, size: Int): OrderConnection
+    
+    review(id: ID!): Review
+    reviews(productId: ID, userId: ID, page: Int, size: Int): ReviewConnection
+    
+    cartItems(userId: ID!): [CartItem]
+    
+    address(id: ID!): Address
+    addresses(userId: ID!): [Address]
+    
+    inventory(productId: ID!): Inventory
+    lowStockProducts: [Inventory]
+}
+
+type Mutation {
+    createUser(input: CreateUserInput!): User
+    updateUser(id: ID!, input: UpdateUserInput!): User
+    deleteUser(id: ID!): Boolean
+    
+    createProduct(input: CreateProductInput!): Product
+    updateProduct(id: ID!, input: UpdateProductInput!): Product
+    deleteProduct(id: ID!): Boolean
+    
+    createCategory(input: CreateCategoryInput!): Category
+    updateCategory(id: ID!, input: UpdateCategoryInput!): Category
+    deleteCategory(id: ID!): Boolean
+    
+    createOrder(input: CreateOrderInput!): Order
+    updateOrderStatus(id: ID!, status: String!): Order
+    
+    createReview(input: CreateReviewInput!): Review
+    updateReview(id: ID!, input: UpdateReviewInput!): Review
+    deleteReview(id: ID!): Boolean
+    
+    addToCart(userId: ID!, productId: ID!, quantity: Int!): CartItem
+    removeFromCart(cartItemId: ID!): Boolean
+    
+    createAddress(input: CreateAddressInput!): Address
+    updateAddress(id: ID!, input: UpdateAddressInput!): Address
+    deleteAddress(id: ID!): Boolean
+    setDefaultAddress(id: ID!): Address
+    
+    updateStock(productId: ID!, quantity: Int!): Inventory
+    reserveStock(productId: ID!, quantity: Int!): Inventory
+    releaseStock(productId: ID!, quantity: Int!): Inventory
+}
