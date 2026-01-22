@@ -2,7 +2,7 @@ package com.shopjoy.util;
 
 public class OptimizationRecommendation {
     
-    public static String recommendSortingAlgorithm(int datasetSize, String sortField) {
+    public static String recommendSortingAlgorithm(int datasetSize) {
         if (datasetSize < 100) {
             return "Use database ORDER BY - overhead of in-memory sorting not worth it for small datasets";
         } else if (datasetSize < 10000) {
@@ -33,23 +33,7 @@ public class OptimizationRecommendation {
             return "Offset-based pagination - simpler implementation, works well for static data";
         }
     }
-    
-    public static String recommendSortAlgorithmByDataCharacteristics(
-        int datasetSize,
-        boolean nearlySorted,
-        boolean uniformDistribution
-    ) {
-        if (nearlySorted && datasetSize < 10000) {
-            return "Insertion Sort - O(n) for nearly sorted data";
-        } else if (datasetSize < 50) {
-            return "Insertion Sort - simple and efficient for very small datasets";
-        } else if (datasetSize > 100000) {
-            return "MergeSort - predictable performance for large datasets, no worst case";
-        } else {
-            return "QuickSort - best average case performance for random data";
-        }
-    }
-    
+
     public static String recommendMemoryOptimization(int datasetSize, long availableMemory) {
         long estimatedMemory = datasetSize * 100L;
         

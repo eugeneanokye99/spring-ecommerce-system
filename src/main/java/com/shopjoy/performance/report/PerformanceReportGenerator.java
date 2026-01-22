@@ -1,7 +1,7 @@
 package com.shopjoy.performance.report;
 
 import com.shopjoy.performance.AlgorithmPerformanceAnalyzer;
-import com.shopjoy.util.algorithm.BenchmarkResult;
+import com.shopjoy.util.BenchmarkResult;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

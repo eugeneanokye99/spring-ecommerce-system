@@ -33,20 +33,12 @@ public class ProductComparators {
     
     public static Comparator<Product> getComparator(String sortBy, String direction) {
         boolean isDesc = "DESC".equalsIgnoreCase(direction);
-        
-        switch (sortBy.toLowerCase()) {
-            case "price":
-                return isDesc ? BY_PRICE_DESC : BY_PRICE_ASC;
-            case "name":
-                return isDesc ? BY_NAME_DESC : BY_NAME_ASC;
-            case "createdat":
-            case "created_at":
-                return isDesc ? BY_CREATED_DATE_DESC : BY_CREATED_DATE_ASC;
-            case "id":
-            case "productid":
-                return isDesc ? BY_ID_DESC : BY_ID_ASC;
-            default:
-                return isDesc ? BY_ID_DESC : BY_ID_ASC;
-        }
+
+        return switch (sortBy.toLowerCase()) {
+            case "price" -> isDesc ? BY_PRICE_DESC : BY_PRICE_ASC;
+            case "name" -> isDesc ? BY_NAME_DESC : BY_NAME_ASC;
+            case "createdat", "created_at" -> isDesc ? BY_CREATED_DATE_DESC : BY_CREATED_DATE_ASC;
+            default -> isDesc ? BY_ID_DESC : BY_ID_ASC;
+        };
     }
 }

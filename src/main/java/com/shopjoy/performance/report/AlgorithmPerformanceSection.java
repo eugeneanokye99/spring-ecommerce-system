@@ -1,6 +1,6 @@
 package com.shopjoy.performance.report;
 
-import com.shopjoy.util.algorithm.BenchmarkResult;
+import com.shopjoy.util.BenchmarkResult;
 
 import java.util.Map;
 

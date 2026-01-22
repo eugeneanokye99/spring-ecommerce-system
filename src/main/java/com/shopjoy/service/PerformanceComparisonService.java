@@ -75,7 +75,7 @@ public class PerformanceComparisonService {
         Map<String, Object> recommendations = new LinkedHashMap<>();
         
         recommendations.put("sortingAlgorithm", 
-            OptimizationRecommendation.recommendSortingAlgorithm(datasetSize, "price"));
+            OptimizationRecommendation.recommendSortingAlgorithm(datasetSize));
         
         recommendations.put("searchAlgorithm", 
             OptimizationRecommendation.recommendSearchAlgorithm(datasetSize, true));

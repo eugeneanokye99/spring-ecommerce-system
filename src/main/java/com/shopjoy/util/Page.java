@@ -59,21 +59,4 @@ public class Page<T> {
         this(content, pageable.getPage(), pageable.getSize(), totalElements);
     }
 
-    /**
-     * Has next boolean.
-     *
-     * @return the boolean
-     */
-    public boolean hasNext() {
-        return !last;
-    }
-
-    /**
-     * Has previous boolean.
-     *
-     * @return the boolean
-     */
-    public boolean hasPrevious() {
-        return !first;
-    }
 }

@@ -32,4 +32,11 @@ public class BenchmarkResult {
             return String.format("%.2f MB", memoryUsedBytes / (1024.0 * 1024.0));
         }
     }
+
+    /**
+     * Returns a formatted string summarizing the benchmark result for display.
+     */
+    public String getFormattedOutput() {
+        return String.format("%s: %s, %s", algorithmName, getExecutionTimeFormatted(), getMemoryUsedFormatted());
+    }
 }
