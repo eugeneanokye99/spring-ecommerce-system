@@ -1,0 +1,42 @@
+{
+  "id": "prod-environment",
+  "name": "E-Commerce Prod Environment",
+  "values": [
+    {
+      "key": "baseUrl",
+      "value": "https://api.ecommerce.com/api/v1",
+      "enabled": true
+    },
+    {
+      "key": "graphqlUrl",
+      "value": "https://api.ecommerce.com/graphql",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment"
+}
