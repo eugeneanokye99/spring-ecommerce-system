@@ -1,0 +1,9 @@
+2026-01-22 16:46:02.193 [main] INFO  c.s.ShopjoyEcommerceSystemApplication - Starting ShopjoyEcommerceSystemApplication using Java 25.0.1 with PID 3892 (C:\Users\EugeneDokyeAnokye\IdeaProjects\spring-ecommerce-system\target\classes started by EugeneDokyeAnokye in C:\Users\EugeneDokyeAnokye\IdeaProjects\spring-ecommerce-system)
+2026-01-22 16:46:02.204 [main] DEBUG c.s.ShopjoyEcommerceSystemApplication - Running with Spring Boot v4.0.1, Spring v7.0.2
+2026-01-22 16:46:02.206 [main] INFO  c.s.ShopjoyEcommerceSystemApplication - The following 1 profile is active: "dev"
+2026-01-22 16:46:03.390 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 9.0.1.Final
+2026-01-22 16:46:30.276 [main] INFO  o.s.boot.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-01-22 16:46:30.341 [main] INFO  o.a.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8080"]
+2026-01-22 16:46:30.345 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-01-22 16:46:30.346 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/11.0.15]
+2026-01-22 16:46:30.971 [main] INFO  o.s.b.w.c.s.WebApplicationContextInitializer - Root WebApplicationContext: initialization completed in 28335 ms
