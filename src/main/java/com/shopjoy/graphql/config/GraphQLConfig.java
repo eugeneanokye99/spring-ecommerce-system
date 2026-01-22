@@ -1,6 +1,5 @@
 package com.shopjoy.graphql.config;
 
-import graphql.scalars.ExtendedScalars;
 import graphql.schema.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

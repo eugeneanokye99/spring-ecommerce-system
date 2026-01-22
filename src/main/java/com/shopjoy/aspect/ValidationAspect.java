@@ -18,16 +18,12 @@ public class ValidationAspect {
     @Before("execution(* com.shopjoy.service.ProductService.create*(..)) && args(product,..)")
     public void validateProductBeforeCreation(JoinPoint joinPoint, Product product) {
         logger.debug("Validating product before creation: {}", product);
-        
-        if (product.getPrice() != null && product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price cannot be negative");
-        }
-        
-        if (product.getName() == null || product.getName().trim().isEmpty()) {
+
+        if (product.getProductName() == null || product.getProductName().trim().isEmpty()) {
             throw new IllegalArgumentException("Product name is required");
         }
         
-        if (product.getName().length() < 3) {
+        if (product.getProductName().length() < 3) {
             throw new IllegalArgumentException("Product name must be at least 3 characters long");
         }
         
@@ -41,12 +37,8 @@ public class ValidationAspect {
         if (productId == null || productId <= 0) {
             throw new IllegalArgumentException("Invalid product ID");
         }
-        
-        if (product.getPrice() != null && product.getPrice() < 0) {
-            throw new IllegalArgumentException("Product price cannot be negative");
-        }
-        
-        if (product.getName() != null && product.getName().length() < 3) {
+
+        if (product.getProductName() != null && product.getProductName().length() < 3) {
             throw new IllegalArgumentException("Product name must be at least 3 characters long");
         }
         
@@ -57,14 +49,10 @@ public class ValidationAspect {
     public void validateOrderBeforeCreation(JoinPoint joinPoint, Order order) {
         logger.debug("Validating order before creation: {}", order);
         
-        if (order.getUserId() == null || order.getUserId() <= 0) {
+        if (order.getUserId() <= 0) {
             throw new IllegalArgumentException("Valid user ID is required for order");
         }
-        
-        if (order.getTotalAmount() != null && order.getTotalAmount() < 0) {
-            throw new IllegalArgumentException("Order total amount cannot be negative");
-        }
-        
+
         logger.debug("Order validation passed");
     }
     

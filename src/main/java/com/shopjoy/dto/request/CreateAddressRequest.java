@@ -44,6 +44,7 @@ public class CreateAddressRequest {
     @Size(max = 100, message = "Country cannot exceed 100 characters")
     private String country;
     
+    @Builder.Default
     private Boolean isDefault = false;
 
 

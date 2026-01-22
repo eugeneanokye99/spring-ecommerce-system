@@ -4,6 +4,7 @@ import com.shopjoy.dto.filter.ProductFilter;
 import com.shopjoy.dto.request.CreateProductRequest;
 import com.shopjoy.dto.request.UpdateProductRequest;
 import com.shopjoy.dto.response.ProductResponse;
+import com.shopjoy.entity.Product;
 import com.shopjoy.util.Page;
 import com.shopjoy.util.Pageable;
 
@@ -180,4 +181,8 @@ public interface ProductService {
      * @return the product response
      */
     ProductResponse searchProductByIdWithBinarySearch(Integer productId);
+    
+    List<ProductResponse> findAllSorted(String sortBy, String sortDirection, String algorithm);
+    
+    Product searchById(Integer id);
 }

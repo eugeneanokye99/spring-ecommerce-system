@@ -118,11 +118,11 @@ public class CachingAspect {
     }
     
     private void incrementCacheHit(String cacheKey) {
-        cacheHits.merge(cacheKey, 1, Integer::sum);
+        cacheHits.merge(cacheKey, 1, (oldValue, newValue) -> oldValue + newValue);
     }
     
     private void incrementCacheMiss(String cacheKey) {
-        cacheMisses.merge(cacheKey, 1, Integer::sum);
+        cacheMisses.merge(cacheKey, 1, (oldValue, newValue) -> oldValue + newValue);
     }
     
     public void clearAllCache() {

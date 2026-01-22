@@ -10,11 +10,7 @@ import com.shopjoy.exception.ResourceNotFoundException;
 import com.shopjoy.exception.ValidationException;
 import com.shopjoy.repository.ProductRepository;
 import com.shopjoy.service.ProductService;
-import com.shopjoy.util.Page;
-import com.shopjoy.util.Pageable;
-import com.shopjoy.util.algorithm.BinarySearch;
-import com.shopjoy.util.algorithm.MergeSort;
-import com.shopjoy.util.algorithm.QuickSort;
+import com.shopjoy.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -283,9 +279,10 @@ public class ProductServiceImpl implements ProductService {
         
         List<Product> products = new ArrayList<>(productRepository.findAll());
         
-        Comparator<Product> comparator = getProductComparator(sortBy, ascending);
+        String direction = ascending ? "ASC" : "DESC";
+        Comparator<Product> comparator = ProductComparators.getComparator(sortBy, direction);
         
-        QuickSort.sort(products, comparator);
+        SortingAlgorithms.quickSort(products, comparator);
         
         logger.info("Successfully sorted {} products using QuickSort", products.size());
         
@@ -300,9 +297,10 @@ public class ProductServiceImpl implements ProductService {
         
         List<Product> products = new ArrayList<>(productRepository.findAll());
         
-        Comparator<Product> comparator = getProductComparator(sortBy, ascending);
+        String direction = ascending ? "ASC" : "DESC";
+        Comparator<Product> comparator = ProductComparators.getComparator(sortBy, direction);
         
-        MergeSort.sort(products, comparator);
+        SortingAlgorithms.mergeSort(products, comparator);
         
         logger.info("Successfully sorted {} products using MergeSort", products.size());
         
@@ -321,10 +319,13 @@ public class ProductServiceImpl implements ProductService {
         
         List<Product> allProducts = new ArrayList<>(productRepository.findAll());
         
-        Comparator<Product> comparator = Comparator.comparing(Product::getProductId);
-        QuickSort.sort(allProducts, comparator);
+        Comparator<Product> comparator = ProductComparators.BY_ID_ASC;
+        SortingAlgorithms.quickSort(allProducts, comparator);
         
-        int index = BinarySearch.searchByProductId(allProducts, productId);
+        Product searchTarget = new Product();
+        searchTarget.setProductId(productId);
+        
+        int index = SearchAlgorithms.binarySearch(allProducts, searchTarget, comparator);
         
         if (index == -1) {
             throw new ResourceNotFoundException("Product", "id", productId);
@@ -336,23 +337,43 @@ public class ProductServiceImpl implements ProductService {
         return ProductMapper.toProductResponse(product);
     }
     
-    private Comparator<Product> getProductComparator(String sortBy, boolean ascending) {
-        if (sortBy == null || sortBy.trim().isEmpty()) {
-            sortBy = "product_id";
+    @Override
+    public List<ProductResponse> findAllSorted(String sortBy, String sortDirection, String algorithm) {
+        logger.info("Fetching products sorted by {} {} using {}", sortBy, sortDirection, algorithm);
+        
+        List<Product> products = new ArrayList<>(productRepository.findAll());
+        Comparator<Product> comparator = ProductComparators.getComparator(sortBy, sortDirection);
+        
+        switch (algorithm.toUpperCase()) {
+            case "QUICKSORT":
+                SortingAlgorithms.quickSort(products, comparator);
+                break;
+            case "MERGESORT":
+                SortingAlgorithms.mergeSort(products, comparator);
+                break;
+            case "HEAPSORT":
+                SortingAlgorithms.heapSort(products, comparator);
+                break;
+            default:
+                SortingAlgorithms.quickSort(products, comparator);
         }
         
-        Comparator<Product> comparator = switch (sortBy.toLowerCase()) {
-            case "product_id" -> Comparator.comparing(Product::getProductId);
-            case "product_name", "name" -> Comparator.comparing(Product::getProductName, String.CASE_INSENSITIVE_ORDER);
-            case "price" -> Comparator.comparing(Product::getPrice);
-            case "cost_price" -> Comparator.comparing(Product::getCostPrice);
-            case "created_at", "createdat" -> Comparator.comparing(Product::getCreatedAt);
-            case "updated_at", "updatedat" -> Comparator.comparing(Product::getUpdatedAt);
-            case "category_id" -> Comparator.comparing(Product::getCategoryId);
-            default -> throw new ValidationException("sortBy", "Invalid sort field: " + sortBy);
-        };
+        return products.stream()
+                .map(ProductMapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
+    
+    @Override
+    public Product searchById(Integer id) {
+        List<Product> sortedProducts = new ArrayList<>(productRepository.findAll());
+        SortingAlgorithms.quickSort(sortedProducts, ProductComparators.BY_ID_ASC);
         
-        return ascending ? comparator : comparator.reversed();
+        Product searchTarget = new Product();
+        searchTarget.setProductId(id);
+        
+        int index = SearchAlgorithms.binarySearch(sortedProducts, searchTarget, ProductComparators.BY_ID_ASC);
+        
+        return index >= 0 ? sortedProducts.get(index) : null;
     }
     
     private void validateProductData(Product product) {

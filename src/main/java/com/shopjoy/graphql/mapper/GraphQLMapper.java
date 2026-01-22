@@ -1,7 +1,6 @@
 package com.shopjoy.graphql.mapper;
 
 import com.shopjoy.dto.request.*;
-import com.shopjoy.entity.*;
 import com.shopjoy.graphql.input.*;
 import org.springframework.stereotype.Component;
 

@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CreateProductRequest {
 
-    @Schema(description = "Product name", example = "Dell XPS 15 Laptop", required = true)
+    @Schema(description = "Product name", example = "Dell XPS 15 Laptop", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Product name is required")
     @Size(min = 3, max = 200, message = "Product name must be between 3 and 200 characters")
     private String productName;
@@ -29,12 +29,12 @@ public class CreateProductRequest {
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
     
-    @Schema(description = "Category unique identifier", example = "1", required = true)
+    @Schema(description = "Category unique identifier", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Category ID is required")
     @Positive(message = "Category ID must be positive")
     private Integer categoryId;
     
-    @Schema(description = "Product selling price", example = "1299.99", required = true)
+    @Schema(description = "Product selling price", example = "1299.99", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Price is required")
     @ValidPrice(message = "Price must be positive with at most 2 decimal places")
     private Double price;
@@ -43,7 +43,7 @@ public class CreateProductRequest {
     @ValidPrice(allowNull = true, message = "Cost price must be positive with at most 2 decimal places")
     private Double costPrice;
     
-    @Schema(description = "Stock Keeping Unit (unique product identifier)", example = "LAPTOP-DELL-XPS15-001", required = true)
+    @Schema(description = "Stock Keeping Unit (unique product identifier)", example = "LAPTOP-DELL-XPS15-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "SKU is required")
     @Size(min = 3, max = 100, message = "SKU must be between 3 and 100 characters")
     private String sku;
@@ -57,6 +57,7 @@ public class CreateProductRequest {
     private String imageUrl;
     
     @Schema(description = "Whether the product is active and available for sale", example = "true", defaultValue = "true")
+    @Builder.Default
     private Boolean isActive = true;
 
 

@@ -15,12 +15,12 @@ import lombok.Setter;
 @Builder
 public class CreateOrderRequest {
     
-    @Schema(description = "User ID placing the order", example = "1", required = true)
+    @Schema(description = "User ID placing the order", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "User ID is required")
     @Positive(message = "User ID must be positive")
     private Integer userId;
     
-    @Schema(description = "Complete shipping address for order delivery", example = "123 Main St, Apt 4B, New York, NY 10001", required = true)
+    @Schema(description = "Complete shipping address for order delivery", example = "123 Main St, Apt 4B, New York, NY 10001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Shipping address is required")
     @Size(max = 500, message = "Shipping address cannot exceed 500 characters")
     private String shippingAddress;

@@ -5,7 +5,6 @@ import com.shopjoy.graphql.input.UserFilterInput;
 import com.shopjoy.graphql.type.PageInfo;
 import com.shopjoy.graphql.type.UserConnection;
 import com.shopjoy.service.UserService;
-import com.shopjoy.util.Page;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;

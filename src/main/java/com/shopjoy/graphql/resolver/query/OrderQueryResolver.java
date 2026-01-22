@@ -4,7 +4,6 @@ import com.shopjoy.dto.response.OrderResponse;
 import com.shopjoy.graphql.type.OrderConnection;
 import com.shopjoy.graphql.type.PageInfo;
 import com.shopjoy.service.OrderService;
-import com.shopjoy.util.Page;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;

@@ -14,27 +14,27 @@ import lombok.Setter;
 @Builder
 public class CreateUserRequest {
 
-    @Schema(description = "Unique username for login", example = "johndoe123", required = true)
+    @Schema(description = "Unique username for login", example = "johndoe123")
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
     
-    @Schema(description = "User email address", example = "john.doe@example.com", required = true)
+    @Schema(description = "User email address", example = "john.doe@example.com")
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
     private String email;
     
-    @Schema(description = "User password (minimum 8 characters)", example = "SecureP@ssw0rd", required = true)
+    @Schema(description = "User password (minimum 8 characters)", example = "SecureP@ssw0rd")
     @NotBlank(message = "Password is required")
     @Size(min = 8, message = "Password must be at least 8 characters")
     private String password;
     
-    @Schema(description = "User first name", example = "John", required = true)
+    @Schema(description = "User first name", example = "John")
     @NotBlank(message = "First name is required")
     @Size(max = 50, message = "First name cannot exceed 50 characters")
     private String firstName;
     
-    @Schema(description = "User last name", example = "Doe", required = true)
+    @Schema(description = "User last name", example = "Doe")
     @NotBlank(message = "Last name is required")
     @Size(max = 50, message = "Last name cannot exceed 50 characters")
     private String lastName;

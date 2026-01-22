@@ -16,20 +16,26 @@ public class Pageable {
     @Schema(description = "Number of items to skip", example = "0")
     private final int offset;
     
+    @Schema(description = "Sort field", example = "id")
+    private final String sortBy;
+    
+    @Schema(description = "Sort direction", example = "ASC")
+    private final String sortDirection;
+    
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 10;
     private static final int MAX_SIZE = 100;
 
-    /**
-     * Instantiates a new Pageable.
-     *
-     * @param page the page
-     * @param size the size
-     */
     public Pageable(Integer page, Integer size) {
+        this(page, size, "id", "ASC");
+    }
+    
+    public Pageable(Integer page, Integer size, String sortBy, String sortDirection) {
         this.page = page != null && page >= 0 ? page : DEFAULT_PAGE;
         this.size = calculateSize(size);
         this.offset = this.page * this.size;
+        this.sortBy = sortBy != null ? sortBy : "id";
+        this.sortDirection = sortDirection != null ? sortDirection : "ASC";
     }
     
     private int calculateSize(Integer size) {
@@ -39,14 +45,11 @@ public class Pageable {
         return Math.min(size, MAX_SIZE);
     }
 
-    /**
-     * Of pageable.
-     *
-     * @param page the page
-     * @param size the size
-     * @return the pageable
-     */
     public static Pageable of(Integer page, Integer size) {
         return new Pageable(page, size);
+    }
+    
+    public static Pageable of(Integer page, Integer size, String sortBy, String sortDirection) {
+        return new Pageable(page, size, sortBy, sortDirection);
     }
 }

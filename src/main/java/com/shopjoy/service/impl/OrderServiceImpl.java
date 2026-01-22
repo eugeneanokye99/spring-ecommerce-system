@@ -39,7 +39,6 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final InventoryService inventoryService;
-    private final ProductService productService;
     private final UserService userService;
 
     /**
@@ -59,7 +58,6 @@ public class OrderServiceImpl implements OrderService {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.inventoryService = inventoryService;
-        this.productService = productService;
         this.userService = userService;
     }
     
