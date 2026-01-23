@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Inventory controller.
+ */
 @Tag(name = "Inventory Management", description = "APIs for managing product stock levels including stock updates, reservations, and low stock monitoring")
 @RestController
 @RequestMapping("/api/v1/inventory")
@@ -20,10 +23,21 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    /**
+     * Instantiates a new Inventory controller.
+     *
+     * @param inventoryService the inventory service
+     */
     public InventoryController(InventoryService inventoryService) {
         this.inventoryService = inventoryService;
     }
 
+    /**
+     * Gets inventory.
+     *
+     * @param productId the product id
+     * @return the inventory
+     */
     @Operation(
             summary = "Get product inventory",
             description = "Retrieves inventory information for a specific product including stock quantity and reorder levels"
@@ -51,6 +65,12 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Inventory retrieved successfully"));
     }
 
+    /**
+     * Is product in stock response entity.
+     *
+     * @param productId the product id
+     * @return the response entity
+     */
     @Operation(
             summary = "Check if product is in stock",
             description = "Verifies whether a product has any available stock"
@@ -75,6 +95,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(inStock, "Stock status checked successfully"));
     }
 
+    /**
+     * Has available stock response entity.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Check stock availability",
             description = "Verifies if sufficient stock is available for a specific quantity"
@@ -101,6 +128,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(hasStock, "Available stock checked successfully"));
     }
 
+    /**
+     * Update stock response entity.
+     *
+     * @param productId   the product id
+     * @param newQuantity the new quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Update stock quantity",
             description = "Sets the stock quantity to a specific value"
@@ -130,6 +164,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Stock updated successfully"));
     }
 
+    /**
+     * Add stock response entity.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Add stock",
             description = "Increases stock quantity by a specified amount"
@@ -159,6 +200,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Stock added successfully"));
     }
 
+    /**
+     * Remove stock response entity.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Remove stock",
             description = "Decreases stock quantity by a specified amount"
@@ -193,6 +241,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Stock removed successfully"));
     }
 
+    /**
+     * Reserve stock response entity.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Reserve stock",
             description = "Reserves a specific quantity of stock for an order, preventing it from being sold to others"
@@ -224,6 +279,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(null, "Stock reserved successfully"));
     }
 
+    /**
+     * Release stock response entity.
+     *
+     * @param productId the product id
+     * @param quantity  the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Release reserved stock",
             description = "Releases previously reserved stock back to available inventory"
@@ -250,6 +312,11 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(null, "Stock released successfully"));
     }
 
+    /**
+     * Gets low stock products.
+     *
+     * @return the low stock products
+     */
     @Operation(
             summary = "Get low stock products",
             description = "Retrieves all products with stock quantities below their reorder levels"
@@ -267,6 +334,11 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Low stock products retrieved successfully"));
     }
 
+    /**
+     * Gets out of stock products.
+     *
+     * @return the out of stock products
+     */
     @Operation(
             summary = "Get out of stock products",
             description = "Retrieves all products with zero available stock"
@@ -284,6 +356,13 @@ public class InventoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Out of stock products retrieved successfully"));
     }
 
+    /**
+     * Update reorder level response entity.
+     *
+     * @param productId    the product id
+     * @param reorderLevel the reorder level
+     * @return the response entity
+     */
     @Operation(
             summary = "Update reorder level",
             description = "Sets the minimum stock quantity that triggers a reorder notification"

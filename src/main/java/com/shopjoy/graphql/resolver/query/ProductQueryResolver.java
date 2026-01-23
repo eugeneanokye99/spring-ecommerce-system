@@ -32,8 +32,7 @@ public class ProductQueryResolver {
             @Argument Integer page,
             @Argument Integer size,
             @Argument String sortBy,
-            @Argument String sortDirection
-    ) {
+            @Argument String sortDirection) {
         int pageNum = page != null ? page : 0;
         int pageSize = size != null ? size : 20;
         String sort = sortBy != null ? sortBy : "id";
@@ -56,15 +55,15 @@ public class ProductQueryResolver {
                 productFilter,
                 pageable,
                 sort,
-                direction
+                direction,
+                null // Default to DATABASE
         );
 
         PageInfo pageInfo = new PageInfo(
                 pageNum,
                 pageSize,
                 productsPage.getTotalElements(),
-                productsPage.getTotalPages()
-        );
+                productsPage.getTotalPages());
 
         return new ProductConnection(productsPage.getContent(), pageInfo);
     }

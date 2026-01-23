@@ -301,18 +301,6 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         return count != null ? count : 0L;
     }
 
-    public List<Product> searchProducts(String searchTerm) {
-        String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products
-                WHERE product_name ILIKE ? OR description ILIKE ?
-                ORDER BY product_name
-                """;
-        String searchPattern = "%" + searchTerm + "%";
-        return jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern);
-    }
-
     public Page<Product> searchProductsPaginated(String searchTerm, Pageable pageable) {
         String sql = """
                 SELECT product_id, category_id, product_name, description, price, cost_price,
@@ -332,18 +320,18 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         return new Page<>(products, pageable, total != null ? total : 0);
     }
 
-    public List<Product> findAllSorted(String sortBy, String sortDirection) {
-        String safeSort = SortValidator.getSafeProductSortField(sortBy);
-        String safeDirection = SortValidator.getSafeDirection(sortDirection);
-
-        String sql = String.format("""
+    public List<Product> findAllWithFilters(ProductFilter filter) {
+        StringBuilder sql = new StringBuilder("""
                 SELECT product_id, category_id, product_name, description, price, cost_price,
                        sku, brand, image_url, is_active, created_at, updated_at
                 FROM products
-                ORDER BY %s %s
-                """, safeSort, safeDirection);
+                WHERE 1=1
+                """);
 
-        return jdbcTemplate.query(sql, productRowMapper);
+        List<Object> params = new ArrayList<>();
+        buildFilterConditions(sql, filter, params);
+
+        return jdbcTemplate.query(sql.toString(), productRowMapper, params.toArray());
     }
 
     public List<Product> findRecentlyAdded(int limit) {

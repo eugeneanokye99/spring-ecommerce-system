@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Cart controller.
+ */
 @Tag(name = "Shopping Cart", description = "APIs for managing user shopping carts including adding, updating, and removing items")
 @RestController
 @RequestMapping("/api/v1/cart")
@@ -23,10 +26,21 @@ public class CartController {
 
     private final CartService cartService;
 
+    /**
+     * Instantiates a new Cart controller.
+     *
+     * @param cartService the cart service
+     */
     public CartController(CartService cartService) {
         this.cartService = cartService;
     }
 
+    /**
+     * Add to cart response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Add item to cart",
             description = "Adds a product to the user's shopping cart with specified quantity"
@@ -59,6 +73,13 @@ public class CartController {
                 .body(ApiResponse.success(response, "Item added to cart successfully"));
     }
 
+    /**
+     * Update cart item quantity response entity.
+     *
+     * @param cartItemId the cart item id
+     * @param quantity   the quantity
+     * @return the response entity
+     */
     @Operation(
             summary = "Update cart item quantity",
             description = "Updates the quantity of an item in the shopping cart"
@@ -93,6 +114,12 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(response, "Cart item quantity updated successfully"));
     }
 
+    /**
+     * Remove from cart response entity.
+     *
+     * @param cartItemId the cart item id
+     * @return the response entity
+     */
     @Operation(
             summary = "Remove item from cart",
             description = "Removes a specific item from the shopping cart"
@@ -117,6 +144,12 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(null, "Item removed from cart successfully"));
     }
 
+    /**
+     * Gets cart items.
+     *
+     * @param userId the user id
+     * @return the cart items
+     */
     @Operation(
             summary = "Get user's cart items",
             description = "Retrieves all items in a user's shopping cart"
@@ -141,6 +174,12 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(response, "Cart items retrieved successfully"));
     }
 
+    /**
+     * Clear cart response entity.
+     *
+     * @param userId the user id
+     * @return the response entity
+     */
     @Operation(
             summary = "Clear cart",
             description = "Removes all items from a user's shopping cart"
@@ -165,6 +204,12 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(null, "Cart cleared successfully"));
     }
 
+    /**
+     * Gets cart total.
+     *
+     * @param userId the user id
+     * @return the cart total
+     */
     @Operation(
             summary = "Get cart total",
             description = "Calculates the total price of all items in the user's cart"
@@ -189,6 +234,12 @@ public class CartController {
         return ResponseEntity.ok(ApiResponse.success(total, "Cart total calculated successfully"));
     }
 
+    /**
+     * Gets cart item count.
+     *
+     * @param userId the user id
+     * @return the cart item count
+     */
     @Operation(
             summary = "Get cart item count",
             description = "Returns the total number of items in the user's cart"

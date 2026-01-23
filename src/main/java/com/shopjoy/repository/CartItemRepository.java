@@ -29,8 +29,6 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
         item.setUserId(rs.getInt("user_id"));
         item.setProductId(rs.getInt("product_id"));
         item.setQuantity(rs.getInt("quantity"));
-        // Timestamp created = rs.getTimestamp("created_at");
-        // if (created != null) item.setCreatedAt(created.toLocalDateTime());
         return item;
     };
 

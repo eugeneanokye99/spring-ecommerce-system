@@ -19,6 +19,7 @@ const ProductBrowse = () => {
     const [totalPages, setTotalPages] = useState(0);
     const [totalElements, setTotalElements] = useState(0);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [algorithm, setAlgorithm] = useState('DATABASE');
     const { user } = useAuth();
 
     const loadProducts = useCallback(async () => {
@@ -30,6 +31,7 @@ const ProductBrowse = () => {
                 isActive: true,
                 sortBy: sortBy,
                 sortDirection: sortDirection,
+                algorithm: algorithm,
                 searchTerm: searchTerm || undefined,
                 categoryId: selectedCategory === 'all' ? undefined : parseInt(selectedCategory),
                 minPrice: priceRange.min || undefined,
@@ -45,7 +47,7 @@ const ProductBrowse = () => {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, searchTerm, selectedCategory, priceRange, sortBy, sortDirection]);
+    }, [currentPage, searchTerm, selectedCategory, priceRange, sortBy, sortDirection, algorithm]);
 
     useEffect(() => {
         loadProducts();
@@ -94,7 +96,7 @@ const ProductBrowse = () => {
 
             {/* Filters Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                     <div className="space-y-2">
                         <label className="text-sm font-semibold text-gray-700 ml-1">Search</label>
                         <div className="relative">
@@ -158,6 +160,23 @@ const ProductBrowse = () => {
                                 <option value="product_name-desc">Name: Z to A</option>
                                 <option value="price-asc">Price: Low to High</option>
                                 <option value="price-desc">Price: High to Low</option>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-semibold text-gray-700 ml-1">Sorting Algorithm</label>
+                        <div className="relative">
+                            <select
+                                value={algorithm}
+                                onChange={(e) => { setAlgorithm(e.target.value); setCurrentPage(0); }}
+                                className="w-full appearance-none pl-4 pr-10 py-2 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary-500 text-sm transition-all font-mono text-xs md:text-sm"
+                            >
+                                <option value="DATABASE">Default (Database)</option>
+                                <option value="QUICKSORT">QuickSort (O(n log n))</option>
+                                <option value="MERGESORT">MergeSort (Stable)</option>
+                                <option value="HEAPSORT">HeapSort (Low Memory)</option>
                             </select>
                             <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
                         </div>
@@ -251,8 +270,8 @@ const ProductBrowse = () => {
                                         key={i}
                                         onClick={() => setCurrentPage(i)}
                                         className={`w-10 h-10 rounded-xl font-bold transition-all ${currentPage === i
-                                                ? 'bg-primary-600 text-black shadow-lg shadow-primary-200'
-                                                : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-100'
+                                            ? 'bg-primary-600 text-black shadow-lg shadow-primary-200'
+                                            : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-100'
                                             }`}
                                     >
                                         {i + 1}

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Review controller.
+ */
 @Tag(name = "Product Reviews", description = "APIs for managing product reviews including creating, rating, and querying customer reviews")
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -24,10 +27,21 @@ public class ReviewController {
 
         private final ReviewService reviewService;
 
+        /**
+         * Instantiates a new Review controller.
+         *
+         * @param reviewService the review service
+         */
         public ReviewController(ReviewService reviewService) {
                 this.reviewService = reviewService;
         }
 
+        /**
+         * Create review response entity.
+         *
+         * @param request the request
+         * @return the response entity
+         */
         @Operation(summary = "Create product review", description = "Creates a new customer review for a product with rating and comment")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Review created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))),
@@ -42,6 +56,12 @@ public class ReviewController {
                                 .body(ApiResponse.success(response, "Review created successfully"));
         }
 
+        /**
+         * Gets review by id.
+         *
+         * @param id the id
+         * @return the review by id
+         */
         @Operation(summary = "Get review by ID", description = "Retrieves a specific review by its unique identifier")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Review retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))),
@@ -54,6 +74,12 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Review retrieved successfully"));
         }
 
+        /**
+         * Gets reviews by product.
+         *
+         * @param productId the product id
+         * @return the reviews by product
+         */
         @Operation(summary = "Get reviews by product", description = "Retrieves all reviews for a specific product")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product reviews retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -66,6 +92,12 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product reviews retrieved successfully"));
         }
 
+        /**
+         * Gets reviews by user.
+         *
+         * @param userId the user id
+         * @return the reviews by user
+         */
         @Operation(summary = "Get reviews by user", description = "Retrieves all reviews written by a specific user")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "User reviews retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -78,6 +110,13 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(response, "User reviews retrieved successfully"));
         }
 
+        /**
+         * Gets reviews by rating.
+         *
+         * @param productId the product id
+         * @param rating    the rating
+         * @return the reviews by rating
+         */
         @Operation(summary = "Get reviews by rating", description = "Retrieves all reviews for a product filtered by specific rating (1-5 stars)")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Reviews by rating retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -91,6 +130,12 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Reviews by rating retrieved successfully"));
         }
 
+        /**
+         * Gets average rating.
+         *
+         * @param productId the product id
+         * @return the average rating
+         */
         @Operation(summary = "Get average product rating", description = "Calculates and returns the average rating for a product based on all reviews")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Average rating calculated successfully", content = @Content(mediaType = "application/json")),
@@ -103,6 +148,13 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(averageRating, "Average rating calculated successfully"));
         }
 
+        /**
+         * Update review response entity.
+         *
+         * @param id      the id
+         * @param request the request
+         * @return the response entity
+         */
         @Operation(summary = "Update review", description = "Updates an existing review's rating and/or comment")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Review updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ReviewResponse.class))),
@@ -117,6 +169,12 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Review updated successfully"));
         }
 
+        /**
+         * Mark review as helpful response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Mark review as helpful", description = "Increments the helpful count for a review when users find it useful")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Review marked as helpful successfully", content = @Content(mediaType = "application/json")),
@@ -129,6 +187,12 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(null, "Review marked as helpful successfully"));
         }
 
+        /**
+         * Delete review response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Delete review", description = "Permanently deletes a product review")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Review deleted successfully", content = @Content(mediaType = "application/json")),
@@ -141,6 +205,11 @@ public class ReviewController {
                 return ResponseEntity.ok(ApiResponse.success(null, "Review deleted successfully"));
         }
 
+        /**
+         * Gets all reviews.
+         *
+         * @return the all reviews
+         */
         @Operation(summary = "Get all reviews", description = "Retrieves all reviews in the system.")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "All reviews retrieved successfully", content = @Content(mediaType = "application/json"))

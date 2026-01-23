@@ -10,9 +10,17 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
+/**
+ * The type Open api config.
+ */
 @Configuration
 public class OpenAPIConfig {
 
+    /**
+     * Custom open api open api.
+     *
+     * @return the open api
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()

@@ -21,6 +21,7 @@ import CategoryManagement from '../../components/admin/CategoryManagement';
 import InventoryManagement from '../../components/admin/InventoryManagement';
 import ReviewManagement from '../../components/admin/ReviewManagement';
 import Dashboard from '../../components/admin/Dashboard';
+import AlgorithmPerformance from '../../components/admin/AlgorithmPerformance';
 
 const AdminDashboard = () => {
     const { user, logout } = useAuth();
@@ -47,6 +48,7 @@ const AdminDashboard = () => {
         { id: 'users', label: 'Users', icon: Users },
         { id: 'inventory', label: 'Inventory', icon: AlertTriangle },
         { id: 'reviews', label: 'Reviews', icon: MessageSquare },
+        { id: 'algorithms', label: 'Algorithms', icon: TrendingUp },
     ];
 
     const renderContent = () => {
@@ -65,6 +67,8 @@ const AdminDashboard = () => {
                 return <InventoryManagement />;
             case 'reviews':
                 return <ReviewManagement />;
+            case 'algorithms':
+                return <AlgorithmPerformance />;
             default:
                 return <Dashboard />;
         }

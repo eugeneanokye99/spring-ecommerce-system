@@ -27,6 +27,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Product controller.
+ */
 @Tag(name = "Product Management", description = "APIs for managing products including CRUD operations, pagination, filtering, sorting, and search capabilities with advanced algorithms")
 @Validated
 @RestController
@@ -36,12 +39,24 @@ public class ProductController {
         private final ProductService productService;
         private final PerformanceComparisonService performanceComparisonService;
 
+        /**
+         * Instantiates a new Product controller.
+         *
+         * @param productService               the product service
+         * @param performanceComparisonService the performance comparison service
+         */
         public ProductController(ProductService productService,
                         PerformanceComparisonService performanceComparisonService) {
                 this.productService = productService;
                 this.performanceComparisonService = performanceComparisonService;
         }
 
+        /**
+         * Create product response entity.
+         *
+         * @param request the request
+         * @return the response entity
+         */
         @Operation(summary = "Create a new product", description = "Creates a new product with the provided details including name, description, price, category, and stock information")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "Product created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductResponse.class), examples = @ExampleObject(name = "Product Created", value = "{\"success\":true,\"message\":\"Product created successfully\",\"data\":{\"productId\":1,\"name\":\"Laptop\",\"price\":999.99},\"timestamp\":\"2024-01-20T10:30:00\"}"))),
@@ -57,6 +72,12 @@ public class ProductController {
                                 .body(ApiResponse.success(response, "Product created successfully"));
         }
 
+        /**
+         * Gets product by id.
+         *
+         * @param id the id
+         * @return the product by id
+         */
         @Operation(summary = "Get product by ID", description = "Retrieves a product by its unique identifier")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProductResponse.class))),
@@ -70,6 +91,11 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product retrieved successfully"));
         }
 
+        /**
+         * Gets all products.
+         *
+         * @return the all products
+         */
         @Operation(summary = "Get all products", description = "Retrieves a complete list of all products in the system")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products retrieved successfully", content = @Content(mediaType = "application/json"))
@@ -80,6 +106,11 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved successfully"));
         }
 
+        /**
+         * Gets active products.
+         *
+         * @return the active products
+         */
         @Operation(summary = "Get all active products", description = "Retrieves only products that are currently active and available for sale")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Active products retrieved successfully", content = @Content(mediaType = "application/json"))
@@ -90,6 +121,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Active products retrieved successfully"));
         }
 
+        /**
+         * Gets products by category.
+         *
+         * @param categoryId the category id
+         * @return the products by category
+         */
         @Operation(summary = "Get products by category", description = "Retrieves all products belonging to a specific category")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products by category retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -102,6 +139,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products by category retrieved successfully"));
         }
 
+        /**
+         * Search products by name response entity.
+         *
+         * @param name the name
+         * @return the response entity
+         */
         @Operation(summary = "Search products by name", description = "Searches for products whose name contains the specified keyword (case-insensitive)")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products search completed successfully", content = @Content(mediaType = "application/json"))
@@ -113,6 +156,13 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products search completed successfully"));
         }
 
+        /**
+         * Gets products by price range.
+         *
+         * @param minPrice the min price
+         * @param maxPrice the max price
+         * @return the products by price range
+         */
         @Operation(summary = "Get products by price range", description = "Retrieves products within a specified price range (inclusive)")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products by price range retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -127,6 +177,13 @@ public class ProductController {
                                 .ok(ApiResponse.success(response, "Products by price range retrieved successfully"));
         }
 
+        /**
+         * Update product response entity.
+         *
+         * @param id      the id
+         * @param request the request
+         * @return the response entity
+         */
         @Operation(summary = "Update product", description = "Updates an existing product's details including name, description, price, category, and stock")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product updated successfully", content = @Content(mediaType = "application/json")),
@@ -141,6 +198,13 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product updated successfully"));
         }
 
+        /**
+         * Update product price response entity.
+         *
+         * @param id       the id
+         * @param newPrice the new price
+         * @return the response entity
+         */
         @Operation(summary = "Update product price", description = "Updates only the price of an existing product")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product price updated successfully", content = @Content(mediaType = "application/json")),
@@ -154,6 +218,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product price updated successfully"));
         }
 
+        /**
+         * Activate product response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Activate product", description = "Activates a product making it available for sale")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product activated successfully", content = @Content(mediaType = "application/json")),
@@ -166,6 +236,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product activated successfully"));
         }
 
+        /**
+         * Deactivate product response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Deactivate product", description = "Deactivates a product removing it from active listings")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product deactivated successfully", content = @Content(mediaType = "application/json")),
@@ -178,6 +254,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product deactivated successfully"));
         }
 
+        /**
+         * Delete product response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Delete product", description = "Permanently deletes a product from the system")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product deleted successfully", content = @Content(mediaType = "application/json")),
@@ -190,6 +272,11 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(null, "Product deleted successfully"));
         }
 
+        /**
+         * Gets total product count.
+         *
+         * @return the total product count
+         */
         @Operation(summary = "Get total product count", description = "Returns the total number of products in the system")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Total product count retrieved successfully", content = @Content(mediaType = "application/json"))
@@ -200,6 +287,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(count, "Total product count retrieved successfully"));
         }
 
+        /**
+         * Gets product count by category.
+         *
+         * @param categoryId the category id
+         * @return the product count by category
+         */
         @Operation(summary = "Get product count by category", description = "Returns the number of products in a specific category")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product count by category retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -213,6 +306,15 @@ public class ProductController {
                                 .ok(ApiResponse.success(count, "Product count by category retrieved successfully"));
         }
 
+        /**
+         * Gets products paginated.
+         *
+         * @param page          the page
+         * @param size          the size
+         * @param sortBy        the sort by
+         * @param sortDirection the sort direction
+         * @return the products paginated
+         */
         @Operation(summary = "Get products with pagination", description = "Retrieves products with pagination support, allowing page number, size, and sorting configuration")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products retrieved with pagination", content = @Content(mediaType = "application/json")),
@@ -229,6 +331,14 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved with pagination"));
         }
 
+        /**
+         * Search products paginated response entity.
+         *
+         * @param term the term
+         * @param page the page
+         * @param size the size
+         * @return the response entity
+         */
         @Operation(summary = "Search products with pagination", description = "Searches for products by name keyword with pagination support")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product search completed with pagination", content = @Content(mediaType = "application/json")),
@@ -244,6 +354,23 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product search completed with pagination"));
         }
 
+        /**
+         * Gets products with filters.
+         *
+         * @param minPrice      the min price
+         * @param maxPrice      the max price
+         * @param categoryId    the category id
+         * @param searchTerm    the search term
+         * @param inStock       the in stock
+         * @param minStock      the min stock
+         * @param maxStock      the max stock
+         * @param isActive      the is active
+         * @param page          the page
+         * @param size          the size
+         * @param sortBy        the sort by
+         * @param sortDirection the sort direction
+         * @return the products with filters
+         */
         @Operation(summary = "Get products with advanced filters", description = "Retrieves products with comprehensive filtering options including price range, category, stock status, search term, and pagination with sorting")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Filtered products retrieved successfully", content = @Content(mediaType = "application/json")),
@@ -262,7 +389,8 @@ public class ProductController {
                         @Parameter(description = "Page number (0-indexed)", example = "0") @RequestParam(defaultValue = "0") int page,
                         @Parameter(description = "Page size", example = "10") @RequestParam(defaultValue = "10") int size,
                         @Parameter(description = "Field to sort by", example = "product_id") @RequestParam(defaultValue = "product_id") String sortBy,
-                        @Parameter(description = "Sort direction (ASC or DESC)", example = "ASC") @RequestParam(defaultValue = "ASC") String sortDirection) {
+                        @Parameter(description = "Sort direction (ASC or DESC)", example = "ASC") @RequestParam(defaultValue = "ASC") String sortDirection,
+                        @Parameter(description = "Sorting algorithm (DATABASE, QUICKSORT, MERGESORT, HEAPSORT)", example = "DATABASE") @RequestParam(defaultValue = "DATABASE") String algorithm) {
 
                 ProductFilter filter = new ProductFilter();
                 filter.setMinPrice(minPrice);
@@ -276,10 +404,17 @@ public class ProductController {
 
                 Pageable pageable = Pageable.of(page, size);
                 Page<ProductResponse> response = productService.getProductsWithFilters(filter, pageable, sortBy,
-                                sortDirection);
+                                sortDirection, algorithm);
                 return ResponseEntity.ok(ApiResponse.success(response, "Filtered products retrieved successfully"));
         }
 
+        /**
+         * Gets products sorted with quick sort.
+         *
+         * @param sortBy    the sort by
+         * @param ascending the ascending
+         * @return the products sorted with quick sort
+         */
         @Operation(summary = "Get products sorted with QuickSort algorithm", description = "Retrieves products sorted using the QuickSort algorithm with O(n log n) average time complexity")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products sorted with QuickSort algorithm", content = @Content(mediaType = "application/json"))
@@ -292,6 +427,13 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products sorted with QuickSort algorithm"));
         }
 
+        /**
+         * Gets products sorted with merge sort.
+         *
+         * @param sortBy    the sort by
+         * @param ascending the ascending
+         * @return the products sorted with merge sort
+         */
         @Operation(summary = "Get products sorted with MergeSort algorithm", description = "Retrieves products sorted using the MergeSort algorithm with O(n log n) guaranteed time complexity")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Products sorted with MergeSort algorithm", content = @Content(mediaType = "application/json"))
@@ -304,6 +446,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Products sorted with MergeSort algorithm"));
         }
 
+        /**
+         * Search product by id with binary search response entity.
+         *
+         * @param id the id
+         * @return the response entity
+         */
         @Operation(summary = "Search product by ID using Binary Search algorithm", description = "Searches for a product by its ID using the Binary Search algorithm with O(log n) time complexity")
         @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
                         @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Product found using Binary Search algorithm", content = @Content(mediaType = "application/json")),
@@ -316,6 +464,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(response, "Product found using Binary Search algorithm"));
         }
 
+        /**
+         * Compare sorting algorithms response entity.
+         *
+         * @param datasetSize the dataset size
+         * @return the response entity
+         */
         @Operation(summary = "Compare sorting algorithms", description = "Benchmarks QuickSort, MergeSort, and HeapSort performance")
         @GetMapping("/algorithms/sort-comparison")
         public ResponseEntity<ApiResponse<java.util.Map<String, BenchmarkResult>>> compareSortingAlgorithms(
@@ -325,6 +479,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(results, "Sorting algorithms compared successfully"));
         }
 
+        /**
+         * Compare search algorithms response entity.
+         *
+         * @param datasetSize the dataset size
+         * @return the response entity
+         */
         @Operation(summary = "Compare search algorithms", description = "Benchmarks Binary Search, Jump Search, and Linear Search performance")
         @GetMapping("/algorithms/search-comparison")
         public ResponseEntity<ApiResponse<java.util.Map<String, BenchmarkResult>>> compareSearchAlgorithms(
@@ -334,6 +494,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(results, "Search algorithms compared successfully"));
         }
 
+        /**
+         * Gets algorithm recommendations.
+         *
+         * @param datasetSize the dataset size
+         * @return the algorithm recommendations
+         */
         @Operation(summary = "Get algorithm recommendations", description = "Provides recommendations for optimal algorithms based on dataset size")
         @GetMapping("/algorithms/recommendations")
         public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> getAlgorithmRecommendations(
@@ -343,6 +509,14 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(recommendations, "Algorithm recommendations generated"));
         }
 
+        /**
+         * Gets products with algorithm.
+         *
+         * @param algorithm     the algorithm
+         * @param sortBy        the sort by
+         * @param sortDirection the sort direction
+         * @return the products with algorithm
+         */
         @Operation(summary = "Get products with custom sorting algorithm", description = "Fetches products sorted using specified algorithm")
         @GetMapping("/sorted/{algorithm}")
         public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsWithAlgorithm(
@@ -353,6 +527,12 @@ public class ProductController {
                 return ResponseEntity.ok(ApiResponse.success(products, "Products sorted with " + algorithm));
         }
 
+        /**
+         * Gets new arrivals.
+         *
+         * @param limit the limit
+         * @return the new arrivals
+         */
         @Operation(summary = "Get recently added products", description = "Retrieves a list of newest products added to the catalog")
         @GetMapping("/new-arrivals")
         public ResponseEntity<ApiResponse<List<ProductResponse>>> getNewArrivals(

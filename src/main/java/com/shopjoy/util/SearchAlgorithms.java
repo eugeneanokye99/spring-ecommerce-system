@@ -1,9 +1,7 @@
 package com.shopjoy.util;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class SearchAlgorithms {
 
@@ -29,21 +27,6 @@ public class SearchAlgorithms {
         }
 
         return -1;
-    }
-
-    public static <T> List<T> linearSearch(List<T> list, Predicate<T> predicate) {
-        List<T> results = new ArrayList<>();
-
-        if (list == null || list.isEmpty() || predicate == null) {
-            return results;
-        }
-
-        for (T element : list) {
-            if (predicate.test(element)) {
-                results.add(element);
-            }
-        }
-        return results;
     }
 
     public static <T> int jumpSearch(List<T> sortedList, T target, Comparator<T> comparator) {

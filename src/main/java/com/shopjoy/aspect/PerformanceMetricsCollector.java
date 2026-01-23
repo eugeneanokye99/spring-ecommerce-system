@@ -22,7 +22,7 @@ public class PerformanceMetricsCollector {
         metrics.computeIfAbsent(key, k -> Collections.synchronizedList(new ArrayList<>()))
                .add(executionTime);
         
-        callCounts.merge(key, 1L, (oldValue, newValue) -> oldValue + newValue);
+        callCounts.merge(key, 1L, Long::sum);
     }
     
     public Map<String, Object> getMetricsForMethod(String category, String methodKey) {

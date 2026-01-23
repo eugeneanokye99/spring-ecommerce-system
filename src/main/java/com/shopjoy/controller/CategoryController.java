@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Category controller.
+ */
 @Tag(name = "Category Management", description = "APIs for managing product categories including hierarchical structure with parent-child relationships")
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -24,10 +27,21 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
+    /**
+     * Instantiates a new Category controller.
+     *
+     * @param categoryService the category service
+     */
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 
+    /**
+     * Create category response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Create a new category",
             description = "Creates a new product category with optional parent category for hierarchical structure"
@@ -60,6 +74,12 @@ public class CategoryController {
                 .body(ApiResponse.success(response, "Category created successfully"));
     }
 
+    /**
+     * Gets category by id.
+     *
+     * @param id the id
+     * @return the category by id
+     */
     @Operation(
             summary = "Get category by ID",
             description = "Retrieves a category's details by its unique identifier"
@@ -87,6 +107,11 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Category retrieved successfully"));
     }
 
+    /**
+     * Gets all categories.
+     *
+     * @return the all categories
+     */
     @Operation(
             summary = "Get all categories",
             description = "Retrieves a complete list of all categories in the system"
@@ -104,6 +129,11 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Categories retrieved successfully"));
     }
 
+    /**
+     * Gets top level categories.
+     *
+     * @return the top level categories
+     */
     @Operation(
             summary = "Get top-level categories",
             description = "Retrieves all categories that have no parent (root categories)"
@@ -121,6 +151,12 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Top level categories retrieved successfully"));
     }
 
+    /**
+     * Gets subcategories.
+     *
+     * @param parentId the parent id
+     * @return the subcategories
+     */
     @Operation(
             summary = "Get subcategories",
             description = "Retrieves all direct child categories of a parent category"
@@ -145,6 +181,12 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Subcategories retrieved successfully"));
     }
 
+    /**
+     * Has subcategories response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @Operation(
             summary = "Check if category has subcategories",
             description = "Checks whether a category has any child categories"
@@ -169,6 +211,13 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(hasSubcategories, "Subcategories check completed"));
     }
 
+    /**
+     * Update category response entity.
+     *
+     * @param id      the id
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Update category",
             description = "Updates an existing category's details including name and description"
@@ -202,6 +251,13 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Category updated successfully"));
     }
 
+    /**
+     * Move category response entity.
+     *
+     * @param id          the id
+     * @param newParentId the new parent id
+     * @return the response entity
+     */
     @Operation(
             summary = "Move category",
             description = "Moves a category to a new parent category or to top level (null parent)"
@@ -236,6 +292,12 @@ public class CategoryController {
         return ResponseEntity.ok(ApiResponse.success(response, "Category moved successfully"));
     }
 
+    /**
+     * Delete category response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @Operation(
             summary = "Delete category",
             description = "Permanently deletes a category from the system (fails if it has subcategories or products)"

@@ -155,7 +155,7 @@ public interface ProductService {
      * @return the products with filters
      */
     Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy,
-            String sortDirection);
+            String sortDirection, String algorithm);
 
     /**
      * Gets products sorted with quick sort.

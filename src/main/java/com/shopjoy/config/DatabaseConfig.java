@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.sql.DataSource;
 
+/**
+ * The type Database config.
+ */
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
@@ -47,6 +50,11 @@ public class DatabaseConfig {
     @Value("${spring.datasource.hikari.pool-name:ShopJoyHikariCP}")
     private String poolName;
 
+    /**
+     * Data source data source.
+     *
+     * @return the data source
+     */
     @Bean
     public DataSource dataSource() {
         HikariConfig config = new HikariConfig();
@@ -68,6 +76,12 @@ public class DatabaseConfig {
         return new HikariDataSource(config);
     }
 
+    /**
+     * Jdbc template jdbc template.
+     *
+     * @param dataSource the data source
+     * @return the jdbc template
+     */
     @Bean
     public JdbcTemplate jdbcTemplate(DataSource dataSource) {
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
@@ -76,11 +90,23 @@ public class DatabaseConfig {
         return jdbcTemplate;
     }
 
+    /**
+     * Named parameter jdbc template named parameter jdbc template.
+     *
+     * @param dataSource the data source
+     * @return the named parameter jdbc template
+     */
     @Bean
     public NamedParameterJdbcTemplate namedParameterJdbcTemplate(DataSource dataSource) {
         return new NamedParameterJdbcTemplate(dataSource);
     }
 
+    /**
+     * Transaction manager platform transaction manager.
+     *
+     * @param dataSource the data source
+     * @return the platform transaction manager
+     */
     @Bean
     public PlatformTransactionManager transactionManager(DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);

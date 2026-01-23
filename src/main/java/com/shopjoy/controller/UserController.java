@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type User controller.
+ */
 @Tag(name = "User Management", description = "APIs for managing users including registration, profile management, and user queries")
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,10 +27,21 @@ public class UserController {
 
     private final UserService userService;
 
+    /**
+     * Instantiates a new User controller.
+     *
+     * @param userService the user service
+     */
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Register user response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Register a new user",
             description = "Creates a new user account with the provided details including username, email, password, and user type"
@@ -60,6 +74,12 @@ public class UserController {
                 .body(ApiResponse.success(response, "User registered successfully"));
     }
 
+    /**
+     * Gets user by id.
+     *
+     * @param id the id
+     * @return the user by id
+     */
     @Operation(
             summary = "Get user by ID",
             description = "Retrieves a user's details by their unique identifier"
@@ -87,6 +107,11 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response, "User retrieved successfully"));
     }
 
+    /**
+     * Gets all users.
+     *
+     * @return the all users
+     */
     @Operation(
             summary = "Get all users",
             description = "Retrieves a list of all registered users in the system"
@@ -104,6 +129,13 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response, "Users retrieved successfully"));
     }
 
+    /**
+     * Update user profile response entity.
+     *
+     * @param id      the id
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Update user profile",
             description = "Updates a user's profile information including username, email, name, phone, and profile image"
@@ -137,6 +169,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response, "User profile updated successfully"));
     }
 
+    /**
+     * Delete user response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @Operation(
             summary = "Delete user",
             description = "Permanently deletes a user account from the system"
@@ -161,6 +199,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(null, "User deleted successfully"));
     }
 
+    /**
+     * Gets user by email.
+     *
+     * @param email the email
+     * @return the user by email
+     */
     @Operation(
             summary = "Find user by email",
             description = "Retrieves a user's details by their email address"
@@ -190,6 +234,12 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response, "User found by email"));
     }
 
+    /**
+     * Authenticate user response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Authenticate user",
             description = "Authenticates a user with username and password (login)"
@@ -223,6 +273,13 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(response, "User authenticated successfully"));
     }
 
+    /**
+     * Change password response entity.
+     *
+     * @param id      the id
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Change user password",
             description = "Changes a user's password by verifying the old password and setting a new one"

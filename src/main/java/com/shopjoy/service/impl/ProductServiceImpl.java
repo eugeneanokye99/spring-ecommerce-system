@@ -271,17 +271,53 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy,
-            String sortDirection) {
+            String sortDirection, String algorithm) {
         logger.info(
-                "Fetching products with filters: minPrice={}, maxPrice={}, categoryId={}, searchTerm={}, page={}, size={}",
+                "Fetching products with filters: minPrice={}, maxPrice={}, categoryId={}, searchTerm={}, page={}, size={}, algorithm={}",
                 filter.getMinPrice(), filter.getMaxPrice(), filter.getCategoryId(),
-                filter.getSearchTerm(), pageable.getPage(), pageable.getSize());
+                filter.getSearchTerm(), pageable.getPage(), pageable.getSize(), algorithm);
 
         if (filter.getMinPrice() != null && filter.getMaxPrice() != null &&
                 filter.getMinPrice() > filter.getMaxPrice()) {
             throw new ValidationException("minPrice", "must be less than or equal to maxPrice");
         }
 
+        if (algorithm != null && !algorithm.equalsIgnoreCase("DATABASE")) {
+            // Fetch all matching products without pagination
+            List<Product> allProducts = productRepository.findAllWithFilters(filter);
+
+            // Sort in memory using requested algorithm
+            Comparator<Product> comparator = ProductComparators.getComparator(sortBy, sortDirection);
+            switch (algorithm.toUpperCase()) {
+                case "QUICKSORT" -> SortingAlgorithms.quickSort(allProducts, comparator);
+                case "MERGESORT" -> SortingAlgorithms.mergeSort(allProducts, comparator);
+                case "HEAPSORT" -> SortingAlgorithms.heapSort(allProducts, comparator);
+                default -> throw new ValidationException("Unknown sorting algorithm: " + algorithm);
+            }
+
+            // Manually paginate
+            int start = pageable.getOffset();
+            int end = Math.min((start + pageable.getSize()), allProducts.size());
+
+            List<Product> pagedContent;
+            if (start >= allProducts.size()) {
+                pagedContent = new ArrayList<>();
+            } else {
+                pagedContent = allProducts.subList(start, end);
+            }
+
+            List<ProductResponse> responseList = pagedContent.stream()
+                    .map(this::convertToResponse)
+                    .collect(Collectors.toList());
+
+            return new Page<>(
+                    responseList,
+                    pageable.getPage(),
+                    pageable.getSize(),
+                    allProducts.size());
+        }
+
+        // Default database sorting/pagination
         Page<Product> productPage = productRepository.findProductsWithFilters(filter, pageable, sortBy, sortDirection);
 
         List<ProductResponse> responseList = productPage.getContent().stream()

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The type Address controller.
+ */
 @Tag(name = "Address Management", description = "APIs for managing user addresses including shipping and billing addresses")
 @RestController
 @RequestMapping("/api/v1/addresses")
@@ -24,10 +27,21 @@ public class AddressController {
 
     private final AddressService addressService;
 
+    /**
+     * Instantiates a new Address controller.
+     *
+     * @param addressService the address service
+     */
     public AddressController(AddressService addressService) {
         this.addressService = addressService;
     }
 
+    /**
+     * Create address response entity.
+     *
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Create address",
             description = "Creates a new address for a user (shipping or billing)"
@@ -60,6 +74,12 @@ public class AddressController {
                 .body(ApiResponse.success(response, "Address created successfully"));
     }
 
+    /**
+     * Gets address by id.
+     *
+     * @param id the id
+     * @return the address by id
+     */
     @Operation(
             summary = "Get address by ID",
             description = "Retrieves a specific address by its unique identifier"
@@ -87,6 +107,12 @@ public class AddressController {
         return ResponseEntity.ok(ApiResponse.success(response, "Address retrieved successfully"));
     }
 
+    /**
+     * Gets addresses by user.
+     *
+     * @param userId the user id
+     * @return the addresses by user
+     */
     @Operation(
             summary = "Get addresses by user",
             description = "Retrieves all addresses for a specific user"
@@ -111,6 +137,12 @@ public class AddressController {
         return ResponseEntity.ok(ApiResponse.success(response, "User addresses retrieved successfully"));
     }
 
+    /**
+     * Gets default address.
+     *
+     * @param userId the user id
+     * @return the default address
+     */
     @Operation(
             summary = "Get default address",
             description = "Retrieves the default address for a specific user"
@@ -138,6 +170,12 @@ public class AddressController {
         return ResponseEntity.ok(ApiResponse.success(response, "Default address retrieved successfully"));
     }
 
+    /**
+     * Sets default address.
+     *
+     * @param id the id
+     * @return the default address
+     */
     @Operation(
             summary = "Set default address",
             description = "Sets an address as the default address for a user"
@@ -165,6 +203,13 @@ public class AddressController {
         return ResponseEntity.ok(ApiResponse.success(response, "Default address set successfully"));
     }
 
+    /**
+     * Update address response entity.
+     *
+     * @param id      the id
+     * @param request the request
+     * @return the response entity
+     */
     @Operation(
             summary = "Update address",
             description = "Updates an existing address details"
@@ -198,6 +243,12 @@ public class AddressController {
         return ResponseEntity.ok(ApiResponse.success(response, "Address updated successfully"));
     }
 
+    /**
+     * Delete address response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @Operation(
             summary = "Delete address",
             description = "Permanently deletes an address"

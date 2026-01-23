@@ -60,6 +60,7 @@ const ProductManagement = () => {
             };
             // Use filtering for admin too, to support search across all products
             const response = await getProductsWithFilters(filters);
+            console.log(response.data);
             setProducts(response.data?.content || []);
             setTotalPages(response.data?.totalPages || 0);
         } catch (error) {
@@ -132,7 +133,7 @@ const ProductManagement = () => {
 
     const handleToggleActive = async (product) => {
         try {
-            if (product.isActive) {
+            if (product.active) {
                 await deactivateProduct(product.productId);
             } else {
                 await activateProduct(product.productId);
@@ -243,7 +244,12 @@ const ProductManagement = () => {
                                     <tr key={product.productId} className="hover:bg-gray-50">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 flex-shrink-0 bg-gray-200 rounded-lg mr-3"></div>
+                                                <img
+                                                    src={product.imageUrl || 'https://via.placeholder.com/40'}
+                                                    alt={product.productName}
+                                                    className="h-10 w-10 flex-shrink-0 rounded-lg mr-3 object-cover bg-gray-200"
+                                                    onError={(e) => { e.target.src = 'https://via.placeholder.com/40'; }}
+                                                />
                                                 <div>
                                                     <div className="text-sm font-medium text-gray-900">{product.name}</div>
                                                     <div className="text-sm text-gray-500 truncate max-w-xs">
@@ -258,12 +264,12 @@ const ProductManagement = () => {
                                         <td className="px-6 py-4">
                                             <button
                                                 onClick={() => handleToggleActive(product)}
-                                                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${product.isActive
+                                                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${product.active
                                                     ? 'bg-green-100 text-green-800'
                                                     : 'bg-gray-100 text-gray-800'
                                                     }`}
                                             >
-                                                {product.isActive ? (
+                                                {product.active ? (
                                                     <>
                                                         <CheckCircle className="w-3 h-3" /> Active
                                                     </>

@@ -9,18 +9,24 @@ import org.springframework.web.filter.CorsFilter;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * The type Cors config.
+ */
 @Configuration
 public class CorsConfig {
 
+    /**
+     * Cors filter cors filter.
+     *
+     * @return the cors filter
+     */
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
 
-        // Allow credentials
         config.setAllowCredentials(true);
 
-        // Allow frontend origins
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
                 "http://localhost:5173",
@@ -29,16 +35,12 @@ public class CorsConfig {
                 "http://127.0.0.1:5173",
                 "http://127.0.0.1:5174"));
 
-        // Allow all headers
         config.setAllowedHeaders(List.of("*"));
 
-        // Allow all HTTP methods
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 
-        // Expose headers
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
 
-        // Max age for preflight requests
         config.setMaxAge(3600L);
 
         source.registerCorsConfiguration("/api/**", config);

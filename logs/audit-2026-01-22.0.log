@@ -1,0 +1,5 @@
+2026-01-22 18:55:25.622 - [2026-01-22 18:55:25.622] AUDIT: STOCK RESERVED - Method: reserveStock, Arguments: [18, 1]
+2026-01-22 18:55:25.628 - [2026-01-22 18:55:25.628] AUDIT: STOCK RESERVED - Method: reserveStock, Arguments: [41, 2]
+2026-01-22 18:55:25.708 - [2026-01-22 18:55:25.708] AUDIT: ORDER CREATED - Method: createOrder, Arguments: [com.shopjoy.dto.request.CreateOrderRequest@662a7b8e]
+2026-01-22 19:05:10.948 - [2026-01-22 19:05:10.948] AUDIT: STOCK RESERVED - Method: reserveStock, Arguments: [41, 2]
+2026-01-22 19:05:10.973 - [2026-01-22 19:05:10.973] AUDIT: ORDER CREATED - Method: createOrder, Arguments: [com.shopjoy.dto.request.CreateOrderRequest@4c268071]
