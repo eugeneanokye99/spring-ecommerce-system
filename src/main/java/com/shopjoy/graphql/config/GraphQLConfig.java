@@ -1,6 +1,7 @@
 package com.shopjoy.graphql.config;
 
 import graphql.schema.*;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
@@ -19,7 +20,7 @@ public class GraphQLConfig {
                         .description("Java LocalDateTime as scalar")
                         .coercing(new Coercing<LocalDateTime, String>() {
                             @Override
-                            public String serialize(Object dataFetcherResult) {
+                            public String serialize(@NonNull Object dataFetcherResult) {
                                 if (dataFetcherResult instanceof LocalDateTime) {
                                     return ((LocalDateTime) dataFetcherResult).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                                 }
@@ -27,7 +28,7 @@ public class GraphQLConfig {
                             }
 
                             @Override
-                            public LocalDateTime parseValue(Object input) {
+                            public LocalDateTime parseValue(@NonNull Object input) {
                                 if (input instanceof String) {
                                     return LocalDateTime.parse((String) input, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                                 }
@@ -35,7 +36,7 @@ public class GraphQLConfig {
                             }
 
                             @Override
-                            public LocalDateTime parseLiteral(Object input) {
+                            public LocalDateTime parseLiteral(@NonNull Object input) {
                                 if (input instanceof String) {
                                     return LocalDateTime.parse((String) input, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
                                 }
