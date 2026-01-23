@@ -613,28 +613,6 @@ The application collects performance metrics across multiple layers:
 - **API Layer**: Threshold 2000ms
 - **GraphQL Layer**: Threshold 2000ms
 
-### Performance Reports
-
-Generate comprehensive performance reports:
-
-```java
-// Run performance analysis
-AlgorithmPerformanceAnalyzer analyzer = new AlgorithmPerformanceAnalyzer();
-AnalysisResult analysis = analyzer.analyzeAllAlgorithms(5000);
-
-// Generate reports
-PerformanceReportGenerator generator = new PerformanceReportGenerator();
-PerformanceReport report = generator.generateReport(
-    analysis, restMetrics, graphqlMetrics, systemMetrics
-);
-
-// Export in multiple formats
-String markdown = generator.generateMarkdownReport(report);
-String html = generator.generateHtmlReport(report);
-String csv = generator.generateCsvReport(report);
-```
-
-See `reports/EXAMPLE_PERFORMANCE_REPORT.md` for sample output.
 
 ### Logging
 
@@ -664,7 +642,6 @@ spring-ecommerce-system/
 │   │   │   ├── entity/           # Database entities
 │   │   │   ├── exception/        # Custom exceptions
 │   │   │   ├── graphql/          # GraphQL resolvers
-│   │   │   ├── performance/      # Performance analysis
 │   │   │   ├── repository/       # Data repositories
 │   │   │   ├── service/          # Business logic
 │   │   │   ├── util/             # Utility classes
@@ -679,7 +656,6 @@ spring-ecommerce-system/
 │       └── java/com/shopjoy/
 │           └── performance/      # Performance tests
 ├── postman/                      # Postman collections
-├── jmeter/                       # JMeter test plans
 ├── reports/                      # Performance reports
 ├── logs/                         # Application logs
 ├── pom.xml
@@ -776,31 +752,6 @@ For issues and questions:
 - Documentation: See `docs/` directory
 - Performance Reports: See `reports/` directory
 
-## Changelog
-
-### Phase 14 (Current)
-- Comprehensive documentation
-- Deployment preparation
-- Production configuration
-
-### Phase 13
-- Performance report generation
-- Multi-format reports (Markdown, HTML, CSV)
-
-### Phase 12
-- Integration and performance testing
-- Postman collections
-- JMeter load testing
-
-### Phase 11
-- Algorithm optimization
-- Sorting and searching algorithms
-- Performance benchmarking
-
-### Phase 10
-- AOP implementation
-- 7 custom aspects
-- Performance monitoring
 
 ## Acknowledgments
 
