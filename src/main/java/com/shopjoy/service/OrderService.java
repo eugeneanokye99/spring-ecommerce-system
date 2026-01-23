@@ -15,7 +15,7 @@ import java.util.List;
  * Handles order creation, status management, and complex order workflows.
  */
 public interface OrderService {
-    
+
     /**
      * Creates a new order for a user.
      * Validates product availability, updates inventory, and calculates total.
@@ -23,12 +23,12 @@ public interface OrderService {
      * 
      * @param request the create order request
      * @return the created order response
-     * @throws ResourceNotFoundException if user or products not found
+     * @throws ResourceNotFoundException  if user or products not found
      * @throws InsufficientStockException if any product is out of stock
-     * @throws ValidationException if order data is invalid
+     * @throws ValidationException        if order data is invalid
      */
     OrderResponse createOrder(CreateOrderRequest request);
-    
+
     /**
      * Retrieves an order by its ID.
      * 
@@ -37,7 +37,7 @@ public interface OrderService {
      * @throws ResourceNotFoundException if order not found
      */
     OrderResponse getOrderById(Integer orderId);
-    
+
     /**
      * Retrieves all orders for a specific user.
      * 
@@ -45,7 +45,7 @@ public interface OrderService {
      * @return list of user's order responses
      */
     List<OrderResponse> getOrdersByUser(Integer userId);
-    
+
     /**
      * Retrieves all orders with a specific status.
      * 
@@ -53,73 +53,85 @@ public interface OrderService {
      * @return list of order responses with the status
      */
     List<OrderResponse> getOrdersByStatus(OrderStatus status);
-    
+
     /**
      * Retrieves orders within a date range.
      * 
      * @param startDate start date (inclusive)
-     * @param endDate end date (inclusive)
+     * @param endDate   end date (inclusive)
      * @return list of order responses in the date range
      */
     List<OrderResponse> getOrdersByDateRange(LocalDateTime startDate, LocalDateTime endDate);
-    
+
     /**
      * Updates an order's status.
      * Validates that the status transition is allowed.
      * 
-     * @param orderId the order ID
+     * @param orderId   the order ID
      * @param newStatus the new status
      * @return the updated order response
-     * @throws ResourceNotFoundException if order not found
+     * @throws ResourceNotFoundException  if order not found
      * @throws InvalidOrderStateException if status transition is invalid
      */
     OrderResponse updateOrderStatus(Integer orderId, OrderStatus newStatus);
-    
+
     /**
      * Confirms a pending order (moves to CONFIRMED status).
      * 
      * @param orderId the order ID
      * @return the updated order response
-     * @throws ResourceNotFoundException if order not found
+     * @throws ResourceNotFoundException  if order not found
      * @throws InvalidOrderStateException if order is not pending
      */
     OrderResponse confirmOrder(Integer orderId);
-    
+
     /**
      * Ships an order (moves to SHIPPED status).
      * 
      * @param orderId the order ID
      * @return the updated order response
-     * @throws ResourceNotFoundException if order not found
+     * @throws ResourceNotFoundException  if order not found
      * @throws InvalidOrderStateException if order is not confirmed
      */
     OrderResponse shipOrder(Integer orderId);
-    
+
     /**
      * Completes an order (moves to COMPLETED status).
      * 
      * @param orderId the order ID
      * @return the updated order response
-     * @throws ResourceNotFoundException if order not found
+     * @throws ResourceNotFoundException  if order not found
      * @throws InvalidOrderStateException if order is not shipped
      */
     OrderResponse completeOrder(Integer orderId);
-    
+
     /**
      * Cancels an order and restores inventory.
      * Can only cancel pending or confirmed orders.
      * 
      * @param orderId the order ID
      * @return the updated order response
-     * @throws ResourceNotFoundException if order not found
+     * @throws ResourceNotFoundException  if order not found
      * @throws InvalidOrderStateException if order cannot be cancelled
      */
     OrderResponse cancelOrder(Integer orderId);
-    
+
+    /**
+     * Retrieves pending orders (requires action).
+     * 
+     * @return list of pending order responses
+     */
     /**
      * Retrieves pending orders (requires action).
      * 
      * @return list of pending order responses
      */
     List<OrderResponse> getPendingOrders();
+
+    /**
+     * Retrieves all orders in the system.
+     * 
+     * @return list of all order responses
+     */
+    List<OrderResponse> getAllOrders();
 }

@@ -154,7 +154,8 @@ public interface ProductService {
      * @param sortDirection the sort direction
      * @return the products with filters
      */
-    Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy, String sortDirection);
+    Page<ProductResponse> getProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy,
+            String sortDirection);
 
     /**
      * Gets products sorted with quick sort.
@@ -181,8 +182,10 @@ public interface ProductService {
      * @return the product response
      */
     ProductResponse searchProductByIdWithBinarySearch(Integer productId);
-    
+
     List<ProductResponse> findAllSorted(String sortBy, String sortDirection, String algorithm);
-    
+
     Product searchById(Integer id);
+
+    List<ProductResponse> getRecentlyAddedProducts(int limit);
 }

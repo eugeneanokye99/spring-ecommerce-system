@@ -28,9 +28,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 public class CartServiceImpl implements CartService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CartServiceImpl.class);
-    
+
     private final CartItemRepository cartItemRepository;
     private final ProductService productService;
     private final InventoryService inventoryService;
@@ -43,41 +43,42 @@ public class CartServiceImpl implements CartService {
      * @param inventoryService   the inventory service
      */
     public CartServiceImpl(CartItemRepository cartItemRepository,
-                          ProductService productService,
-                          InventoryService inventoryService) {
+            ProductService productService,
+            InventoryService inventoryService) {
         this.cartItemRepository = cartItemRepository;
         this.productService = productService;
         this.inventoryService = inventoryService;
     }
-    
+
     @Override
     @Transactional()
     public CartItemResponse addToCart(AddToCartRequest request) {
         logger.info("Adding product {} to cart for user {}", request.getProductId(), request.getUserId());
-        
+
         if (request.getQuantity() <= 0) {
             throw new ValidationException("quantity", "must be positive");
         }
-        
+
         productService.getProductById(request.getProductId());
-        
+
         if (!inventoryService.hasAvailableStock(request.getProductId(), request.getQuantity())) {
             throw new InsufficientStockException(request.getProductId(), request.getQuantity(), 0);
         }
-        
-        Optional<CartItem> existingItem = cartItemRepository.findByUserAndProduct(request.getUserId(), request.getProductId());
-        
+
+        Optional<CartItem> existingItem = cartItemRepository.findByUserAndProduct(request.getUserId(),
+                request.getProductId());
+
         if (existingItem.isPresent()) {
             CartItem cartItem = existingItem.get();
             int newQuantity = cartItem.getQuantity() + request.getQuantity();
-            
+
             if (!inventoryService.hasAvailableStock(request.getProductId(), newQuantity)) {
                 throw new InsufficientStockException(request.getProductId(), newQuantity, 0);
             }
-            
+
             cartItem.setQuantity(newQuantity);
             CartItem updatedItem = cartItemRepository.update(cartItem);
-            return CartItemMapper.toCartItemResponse(updatedItem);
+            return convertToResponse(updatedItem);
         } else {
             CartItem cartItem = CartItem.builder()
                     .userId(request.getUserId())
@@ -85,64 +86,64 @@ public class CartServiceImpl implements CartService {
                     .quantity(request.getQuantity())
                     .createdAt(LocalDateTime.now())
                     .build();
-            
+
             CartItem savedItem = cartItemRepository.save(cartItem);
-            return CartItemMapper.toCartItemResponse(savedItem);
+            return convertToResponse(savedItem);
         }
     }
-    
+
     @Override
     @Transactional()
     public CartItemResponse updateCartItemQuantity(Integer cartItemId, int newQuantity) {
         logger.info("Updating cart item {} quantity to {}", cartItemId, newQuantity);
-        
+
         if (newQuantity <= 0) {
             throw new ValidationException("quantity", "must be positive");
         }
-        
+
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("CartItem", "id", cartItemId));
-        
+
         if (!inventoryService.hasAvailableStock(cartItem.getProductId(), newQuantity)) {
             throw new InsufficientStockException(cartItem.getProductId(), newQuantity, 0);
         }
-        
+
         cartItem.setQuantity(newQuantity);
         CartItem updatedItem = cartItemRepository.update(cartItem);
-        return CartItemMapper.toCartItemResponse(updatedItem);
+        return convertToResponse(updatedItem);
     }
-    
+
     @Override
     @Transactional()
     public void removeFromCart(Integer cartItemId) {
         logger.info("Removing cart item {}", cartItemId);
-        
+
         if (!cartItemRepository.existsById(cartItemId)) {
             throw new ResourceNotFoundException("CartItem", "id", cartItemId);
         }
-        
+
         cartItemRepository.delete(cartItemId);
     }
-    
+
     @Override
     public List<CartItemResponse> getCartItems(Integer userId) {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
         return items.stream()
-                .map(CartItemMapper::toCartItemResponse)
+                .map(this::convertToResponse)
                 .collect(Collectors.toList());
     }
-    
+
     @Override
     @Transactional()
     public void clearCart(Integer userId) {
         logger.info("Clearing cart for user {}", userId);
         cartItemRepository.clearCart(userId);
     }
-    
+
     @Override
     public double getCartTotal(Integer userId) {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
-        
+
         return items.stream()
                 .mapToDouble(item -> {
                     ProductResponse product = productService.getProductById(item.getProductId());
@@ -150,12 +151,26 @@ public class CartServiceImpl implements CartService {
                 })
                 .sum();
     }
-    
+
     @Override
     public int getCartItemCount(Integer userId) {
         List<CartItem> items = cartItemRepository.findByUserId(userId);
         return items.stream()
                 .mapToInt(CartItem::getQuantity)
                 .sum();
+    }
+
+    private CartItemResponse convertToResponse(CartItem cartItem) {
+        String productName = "Unknown Product";
+        double price = 0.0;
+        try {
+            ProductResponse product = productService.getProductById(cartItem.getProductId());
+            productName = product.getProductName();
+            price = product.getPrice();
+        } catch (Exception e) {
+            logger.warn("Could not fetch product details for cart item {}: {}", cartItem.getCartItemId(),
+                    e.getMessage());
+        }
+        return CartItemMapper.toCartItemResponse(cartItem, productName, price);
     }
 }

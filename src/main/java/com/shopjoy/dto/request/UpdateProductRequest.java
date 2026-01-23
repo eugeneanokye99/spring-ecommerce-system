@@ -5,12 +5,16 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Schema(description = "Request for updating an existing product - all fields are optional")
 @Setter
 @Getter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UpdateProductRequest {
 
     @Schema(description = "Updated product name", example = "Dell XPS 15 Laptop (2024 Edition)")

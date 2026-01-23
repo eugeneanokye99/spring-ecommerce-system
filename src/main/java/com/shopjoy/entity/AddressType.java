@@ -14,7 +14,19 @@ public enum AddressType {
     /**
      * Billing address type.
      */
-    BILLING("Billing");
+    BILLING("Billing"),
+    /**
+     * Home address label.
+     */
+    HOME("Home"),
+    /**
+     * Work address label.
+     */
+    WORK("Work"),
+    /**
+     * Other address label.
+     */
+    OTHER("Other");
 
     private final String displayName;
 

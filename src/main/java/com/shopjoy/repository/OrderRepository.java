@@ -32,7 +32,8 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
         order.setOrderId(rs.getInt("order_id"));
         order.setUserId(rs.getInt("user_id"));
         Timestamp orderDate = rs.getTimestamp("order_date");
-        if (orderDate != null) order.setOrderDate(orderDate.toLocalDateTime());
+        if (orderDate != null)
+            order.setOrderDate(orderDate.toLocalDateTime());
         order.setTotalAmount(rs.getDouble("total_amount"));
         String statusStr = rs.getString("status");
         order.setStatus(statusStr != null ? OrderStatus.fromString(statusStr) : null);
@@ -42,9 +43,11 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
         order.setPaymentStatus(paymentStatusStr != null ? PaymentStatus.fromString(paymentStatusStr) : null);
         order.setNotes(rs.getString("notes"));
         Timestamp created = rs.getTimestamp("created_at");
-        if (created != null) order.setCreatedAt(created.toLocalDateTime());
+        if (created != null)
+            order.setCreatedAt(created.toLocalDateTime());
         Timestamp updated = rs.getTimestamp("updated_at");
-        if (updated != null) order.setUpdatedAt(updated.toLocalDateTime());
+        if (updated != null)
+            order.setUpdatedAt(updated.toLocalDateTime());
         return order;
     };
 
@@ -59,7 +62,8 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
 
     @Override
     public Optional<Order> findById(Integer orderId) {
-        if (orderId == null) return Optional.empty();
+        if (orderId == null)
+            return Optional.empty();
         String sql = "SELECT * FROM orders WHERE order_id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, orderRowMapper, orderId));
@@ -86,11 +90,13 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
             ps.setString(4, order.getStatus() != null ? order.getStatus().toString().toLowerCase() : null);
             ps.setString(5, order.getShippingAddress());
             ps.setString(6, order.getPaymentMethod());
-            ps.setString(7, order.getPaymentStatus() != null ? order.getPaymentStatus().toString().toLowerCase() : null);
+            ps.setString(7,
+                    order.getPaymentStatus() != null ? order.getPaymentStatus().toString().toLowerCase() : null);
             ps.setString(8, order.getNotes());
             return ps;
         }, keyHolder);
-        if (keyHolder.getKey() != null) order.setOrderId(keyHolder.getKey().intValue());
+        if (keyHolder.getKey() != null)
+            order.setOrderId(keyHolder.getKey().intValue());
         return order;
     }
 
@@ -98,10 +104,10 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
     @Transactional()
     public Order update(Order order) {
         String sql = "UPDATE orders SET status = ?, payment_status = ?, notes = ? WHERE order_id = ?";
-        jdbcTemplate.update(sql, 
-            order.getStatus() != null ? order.getStatus().toString().toLowerCase() : null,
-            order.getPaymentStatus() != null ? order.getPaymentStatus().toString().toLowerCase() : null,
-            order.getNotes(), order.getOrderId());
+        jdbcTemplate.update(sql,
+                order.getStatus() != null ? order.getStatus().toString().toLowerCase() : null,
+                order.getPaymentStatus() != null ? order.getPaymentStatus().toString().toLowerCase() : null,
+                order.getNotes(), order.getOrderId());
         return order;
     }
 
@@ -130,8 +136,8 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
      * @return the list
      */
     public List<Order> findByUserId(int userId) {
-        return jdbcTemplate.query("SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC", 
-            orderRowMapper, userId);
+        return jdbcTemplate.query("SELECT * FROM orders WHERE user_id = ? ORDER BY order_date DESC",
+                orderRowMapper, userId);
     }
 
     /**
@@ -141,8 +147,8 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
      * @return the list
      */
     public List<Order> findByStatus(OrderStatus status) {
-        return jdbcTemplate.query("SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC", 
-            orderRowMapper, status.toString().toLowerCase());
+        return jdbcTemplate.query("SELECT * FROM orders WHERE status = ? ORDER BY order_date DESC",
+                orderRowMapper, status.toString().toLowerCase());
     }
 
     /**
@@ -153,10 +159,9 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
      * @return the list
      */
     public List<Order> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
-        return jdbcTemplate.query("SELECT * FROM orders WHERE order_date BETWEEN ? AND ? ORDER BY order_date DESC", 
-            orderRowMapper, startDate, endDate);
+        return jdbcTemplate.query("SELECT * FROM orders WHERE order_date BETWEEN ? AND ? ORDER BY order_date DESC",
+                orderRowMapper, startDate, endDate);
     }
-
 
     /**
      * Has user purchased product boolean.
@@ -167,8 +172,8 @@ public class OrderRepository implements GenericRepository<Order, Integer> {
      */
     public boolean hasUserPurchasedProduct(int userId, int productId) {
         String sql = "SELECT COUNT(*) FROM order_items oi " +
-                     "JOIN orders o ON oi.order_id = o.order_id " +
-                     "WHERE o.user_id = ? AND oi.product_id = ? AND o.status IN ('completed', 'shipped')";
+                "JOIN orders o ON oi.order_id = o.order_id " +
+                "WHERE o.user_id = ? AND oi.product_id = ? AND o.status IN ('delivered', 'shipped')";
         Long count = jdbcTemplate.queryForObject(sql, Long.class, userId, productId);
         return count != null && count > 0;
     }

@@ -38,7 +38,8 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         address.setCountry(rs.getString("country"));
         address.setDefault(rs.getBoolean("is_default"));
         Timestamp created = rs.getTimestamp("created_at");
-        if (created != null) address.setCreatedAt(created.toLocalDateTime());
+        if (created != null)
+            address.setCreatedAt(created.toLocalDateTime());
         return address;
     };
 
@@ -53,7 +54,8 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
 
     @Override
     public Optional<Address> findById(Integer addressId) {
-        if (addressId == null) return Optional.empty();
+        if (addressId == null)
+            return Optional.empty();
         String sql = "SELECT * FROM addresses WHERE address_id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, addressRowMapper, addressId));
@@ -75,7 +77,7 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
         jdbcTemplate.update(conn -> {
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, address.getUserId());
-            ps.setString(2, address.getAddressType() != null ? address.getAddressType().name().toLowerCase() : null);
+            ps.setString(2, address.getAddressType() != null ? address.getAddressType().name() : null);
             ps.setString(3, address.getStreetAddress());
             ps.setString(4, address.getCity());
             ps.setString(5, address.getState());
@@ -84,16 +86,24 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
             ps.setBoolean(8, address.isDefault());
             return ps;
         }, keyHolder);
-        if (keyHolder.getKey() != null) address.setAddressId(keyHolder.getKey().intValue());
+        if (keyHolder.getKey() != null)
+            address.setAddressId(keyHolder.getKey().intValue());
         return address;
     }
 
     @Override
     @Transactional()
     public Address update(Address address) {
-        String sql = "UPDATE addresses SET street_address = ?, city = ?, state = ?, postal_code = ?, country = ?, is_default = ? WHERE address_id = ?";
-        jdbcTemplate.update(sql, address.getStreetAddress(), address.getCity(), address.getState(), 
-            address.getPostalCode(), address.getCountry(), address.isDefault(), address.getAddressId());
+        String sql = "UPDATE addresses SET address_type = ?, street_address = ?, city = ?, state = ?, postal_code = ?, country = ?, is_default = ? WHERE address_id = ?";
+        jdbcTemplate.update(sql,
+                address.getAddressType() != null ? address.getAddressType().name() : null,
+                address.getStreetAddress(),
+                address.getCity(),
+                address.getState(),
+                address.getPostalCode(),
+                address.getCountry(),
+                address.isDefault(),
+                address.getAddressId());
         return address;
     }
 
@@ -111,7 +121,8 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
 
     @Override
     public boolean existsById(Integer addressId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM addresses WHERE address_id = ?", Long.class, addressId);
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM addresses WHERE address_id = ?", Long.class,
+                addressId);
         return count != null && count > 0;
     }
 
@@ -122,10 +133,9 @@ public class AddressRepository implements GenericRepository<Address, Integer> {
      * @return the list
      */
     public List<Address> findByUserId(int userId) {
-        return jdbcTemplate.query("SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC", 
-            addressRowMapper, userId);
+        return jdbcTemplate.query("SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC",
+                addressRowMapper, userId);
     }
-
 
     /**
      * Find default address optional.

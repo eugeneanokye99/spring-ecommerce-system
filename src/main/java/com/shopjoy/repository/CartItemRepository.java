@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +29,8 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
         item.setUserId(rs.getInt("user_id"));
         item.setProductId(rs.getInt("product_id"));
         item.setQuantity(rs.getInt("quantity"));
-        Timestamp created = rs.getTimestamp("created_at");
-        if (created != null) item.setCreatedAt(created.toLocalDateTime());
+        // Timestamp created = rs.getTimestamp("created_at");
+        // if (created != null) item.setCreatedAt(created.toLocalDateTime());
         return item;
     };
 
@@ -46,7 +45,8 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
 
     @Override
     public Optional<CartItem> findById(Integer cartItemId) {
-        if (cartItemId == null) return Optional.empty();
+        if (cartItemId == null)
+            return Optional.empty();
         String sql = "SELECT * FROM cart_items WHERE cart_item_id = ?";
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, cartItemRowMapper, cartItemId));
@@ -69,7 +69,7 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
             existingItem.setQuantity(existingItem.getQuantity() + item.getQuantity());
             return update(existingItem);
         }
-        
+
         String sql = "INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?) RETURNING cart_item_id";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(conn -> {
@@ -79,15 +79,16 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
             ps.setInt(3, item.getQuantity());
             return ps;
         }, keyHolder);
-        if (keyHolder.getKey() != null) item.setCartItemId(keyHolder.getKey().intValue());
+        if (keyHolder.getKey() != null)
+            item.setCartItemId(keyHolder.getKey().intValue());
         return item;
     }
 
     @Override
     @Transactional()
     public CartItem update(CartItem item) {
-        jdbcTemplate.update("UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?", 
-            item.getQuantity(), item.getCartItemId());
+        jdbcTemplate.update("UPDATE cart_items SET quantity = ? WHERE cart_item_id = ?",
+                item.getQuantity(), item.getCartItemId());
         return item;
     }
 
@@ -105,7 +106,8 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
 
     @Override
     public boolean existsById(Integer cartItemId) {
-        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cart_items WHERE cart_item_id = ?", Long.class, cartItemId);
+        Long count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM cart_items WHERE cart_item_id = ?", Long.class,
+                cartItemId);
         return count != null && count > 0;
     }
 
@@ -116,8 +118,8 @@ public class CartItemRepository implements GenericRepository<CartItem, Integer> 
      * @return the list
      */
     public List<CartItem> findByUserId(int userId) {
-        return jdbcTemplate.query("SELECT * FROM cart_items WHERE user_id = ? ORDER BY cart_item_id", 
-            cartItemRowMapper, userId);
+        return jdbcTemplate.query("SELECT * FROM cart_items WHERE user_id = ? ORDER BY cart_item_id",
+                cartItemRowMapper, userId);
     }
 
     /**

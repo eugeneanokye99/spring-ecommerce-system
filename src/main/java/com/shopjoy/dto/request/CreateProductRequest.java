@@ -24,42 +24,43 @@ public class CreateProductRequest {
     @NotBlank(message = "Product name is required")
     @Size(min = 3, max = 200, message = "Product name must be between 3 and 200 characters")
     private String productName;
-    
+
     @Schema(description = "Detailed product description", example = "High-performance laptop with Intel Core i7 processor, 16GB RAM, and 512GB SSD")
     @Size(max = 2000, message = "Description cannot exceed 2000 characters")
     private String description;
-    
+
     @Schema(description = "Category unique identifier", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Category ID is required")
     @Positive(message = "Category ID must be positive")
     private Integer categoryId;
-    
+
     @Schema(description = "Product selling price", example = "1299.99", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Price is required")
     @ValidPrice(message = "Price must be positive with at most 2 decimal places")
     private Double price;
-    
+
     @Schema(description = "Product cost price (wholesale/manufacturing cost)", example = "899.99")
     @ValidPrice(allowNull = true, message = "Cost price must be positive with at most 2 decimal places")
     private Double costPrice;
-    
+
     @Schema(description = "Stock Keeping Unit (unique product identifier)", example = "LAPTOP-DELL-XPS15-001", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "SKU is required")
     @Size(min = 3, max = 100, message = "SKU must be between 3 and 100 characters")
     private String sku;
-    
+
     @Schema(description = "Product brand name", example = "Dell")
     @Size(max = 100, message = "Brand cannot exceed 100 characters")
     private String brand;
-    
+
     @Schema(description = "Product image URL", example = "https://example.com/images/dell-xps15.jpg")
     @Size(max = 500, message = "Image URL cannot exceed 500 characters")
     private String imageUrl;
-    
+
     @Schema(description = "Whether the product is active and available for sale", example = "true", defaultValue = "true")
     @Builder.Default
     private Boolean isActive = true;
 
-
+    @Schema(description = "Initial stock quantity", example = "100")
+    private Integer initialStock;
 
 }

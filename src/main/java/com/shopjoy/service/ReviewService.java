@@ -14,19 +14,20 @@ import java.util.List;
  * Handles review creation, moderation, and queries.
  */
 public interface ReviewService {
-    
+
     /**
      * Creates a new product review.
-     * Validates that user has purchased the product if verified purchase flag is set.
+     * Validates that user has purchased the product if verified purchase flag is
+     * set.
      * 
      * @param request the create review request
      * @return the created review response
      * @throws ResourceNotFoundException if product or user not found
-     * @throws ValidationException if review data is invalid
-     * @throws BusinessException if user hasn't purchased the product
+     * @throws ValidationException       if review data is invalid
+     * @throws BusinessException         if user hasn't purchased the product
      */
     ReviewResponse createReview(CreateReviewRequest request);
-    
+
     /**
      * Retrieves a review by its ID.
      * 
@@ -35,7 +36,7 @@ public interface ReviewService {
      * @throws ResourceNotFoundException if review not found
      */
     ReviewResponse getReviewById(Integer reviewId);
-    
+
     /**
      * Retrieves all reviews for a product.
      * 
@@ -43,7 +44,7 @@ public interface ReviewService {
      * @return list of review responses
      */
     List<ReviewResponse> getReviewsByProduct(Integer productId);
-    
+
     /**
      * Retrieves all reviews by a specific user.
      * 
@@ -51,16 +52,16 @@ public interface ReviewService {
      * @return list of review responses
      */
     List<ReviewResponse> getReviewsByUser(Integer userId);
-    
+
     /**
      * Retrieves reviews for a product filtered by rating.
      * 
      * @param productId the product ID
-     * @param rating the rating (1-5)
+     * @param rating    the rating (1-5)
      * @return list of review responses with the specified rating
      */
     List<ReviewResponse> getReviewsByRating(Integer productId, int rating);
-    
+
     /**
      * Calculates the average rating for a product.
      * 
@@ -68,20 +69,21 @@ public interface ReviewService {
      * @return the average rating (0.0 if no reviews)
      */
     double getAverageRating(Integer productId);
-    
+
     /**
      * Updates an existing review.
      * Only the review author can update their review.
      * 
      * @param reviewId the review ID
-     * @param request the update review request
+     * @param request  the update review request
      * @return the updated review response
      * @throws ResourceNotFoundException if review not found
-     * @throws ValidationException if review data is invalid
-     * @throws BusinessException if attempting to update someone else's review
+     * @throws ValidationException       if review data is invalid
+     * @throws BusinessException         if attempting to update someone else's
+     *                                   review
      */
     ReviewResponse updateReview(Integer reviewId, UpdateReviewRequest request);
-    
+
     /**
      * Deletes a review.
      * 
@@ -89,7 +91,7 @@ public interface ReviewService {
      * @throws ResourceNotFoundException if review not found
      */
     void deleteReview(Integer reviewId);
-    
+
     /**
      * Marks a review as helpful (increments helpful count).
      * 
@@ -98,4 +100,12 @@ public interface ReviewService {
      * @throws ResourceNotFoundException if review not found
      */
     ReviewResponse markReviewAsHelpful(Integer reviewId);
+
+    /**
+     * Retrieves all reviews in the system.
+     * Useful for administrative purposes.
+     * 
+     * @return list of all review responses
+     */
+    List<ReviewResponse> getAllReviews();
 }

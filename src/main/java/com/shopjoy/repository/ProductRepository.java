@@ -56,14 +56,15 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
 
     @Override
     public Optional<Product> findById(Integer productId) {
-        if (productId == null) return Optional.empty();
-        
+        if (productId == null)
+            return Optional.empty();
+
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products WHERE product_id = ?
-               \s""";
-        
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products WHERE product_id = ?
+                \s""";
+
         try {
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, productRowMapper, productId));
         } catch (EmptyResultDataAccessException e) {
@@ -74,10 +75,10 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     @Override
     public List<Product> findAll() {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products ORDER BY product_name
-               \s""";
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products ORDER BY product_name
+                \s""";
         return jdbcTemplate.query(sql, productRowMapper);
     }
 
@@ -85,12 +86,12 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     @Transactional()
     public Product save(Product product) {
         String sql = """
-                INSERT INTO products (category_id, product_name, description, price, cost_price,
-                                    sku, brand, image_url, is_active, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                RETURNING product_id
-               \s""";
-        
+                 INSERT INTO products (category_id, product_name, description, price, cost_price,
+                                     sku, brand, image_url, is_active, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 RETURNING product_id
+                \s""";
+
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
@@ -107,7 +108,7 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
             ps.setObject(11, product.getUpdatedAt());
             return ps;
         }, keyHolder);
-        
+
         product.setProductId(Objects.requireNonNull(keyHolder.getKey()).intValue());
         return product;
     }
@@ -116,12 +117,12 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
     @Transactional()
     public Product update(Product product) {
         String sql = """
-                UPDATE products\s
-                SET category_id = ?, product_name = ?, description = ?, price = ?, cost_price = ?,
-                    sku = ?, brand = ?, image_url = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
-                WHERE product_id = ?
-               \s""";
-        
+                 UPDATE products\s
+                 SET category_id = ?, product_name = ?, description = ?, price = ?, cost_price = ?,
+                     sku = ?, brand = ?, image_url = ?, is_active = ?, updated_at = CURRENT_TIMESTAMP
+                 WHERE product_id = ?
+                \s""";
+
         jdbcTemplate.update(sql,
                 product.getCategoryId(),
                 product.getProductName(),
@@ -133,7 +134,7 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
                 product.getImageUrl(),
                 product.isActive(),
                 product.getProductId());
-        
+
         return product;
     }
 
@@ -153,7 +154,8 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
 
     @Override
     public boolean existsById(Integer productId) {
-        if (productId == null) return false;
+        if (productId == null)
+            return false;
         String sql = "SELECT COUNT(*) FROM products WHERE product_id = ?";
         Long count = jdbcTemplate.queryForObject(sql, Long.class, productId);
         return count != null && count > 0;
@@ -167,10 +169,10 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByCategoryId(Integer categoryId) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products WHERE category_id = ? ORDER BY product_name
-               \s""";
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products WHERE category_id = ? ORDER BY product_name
+                \s""";
         return jdbcTemplate.query(sql, productRowMapper, categoryId);
     }
 
@@ -182,10 +184,10 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByNameContaining(String keyword) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products WHERE product_name ILIKE ? ORDER BY product_name
-               \s""";
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products WHERE product_name ILIKE ? ORDER BY product_name
+                \s""";
         return jdbcTemplate.query(sql, productRowMapper, "%" + keyword + "%");
     }
 
@@ -198,13 +200,12 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
      */
     public List<Product> findByPriceRange(double minPrice, double maxPrice) {
         String sql = """
-                SELECT product_id, category_id, product_name, description, price, cost_price,
-                       sku, brand, image_url, is_active, created_at, updated_at
-                FROM products WHERE price BETWEEN ? AND ? ORDER BY price
-               \s""";
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products WHERE price BETWEEN ? AND ? ORDER BY price
+                \s""";
         return jdbcTemplate.query(sql, productRowMapper, minPrice, maxPrice);
     }
-
 
     /**
      * Count by category long.
@@ -217,11 +218,11 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         Long count = jdbcTemplate.queryForObject(sql, Long.class, categoryId);
         return count != null ? count : 0L;
     }
-    
+
     public Page<Product> findAllPaginated(Pageable pageable, String sortBy, String sortDirection) {
         String safeSort = SortValidator.getSafeProductSortField(sortBy);
         String safeDirection = SortValidator.getSafeDirection(sortDirection);
-        
+
         String sql = String.format("""
                 SELECT product_id, category_id, product_name, description, price, cost_price,
                        sku, brand, image_url, is_active, created_at, updated_at
@@ -229,76 +230,77 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
                 ORDER BY %s %s
                 LIMIT ? OFFSET ?
                 """, safeSort, safeDirection);
-        
+
         List<Product> products = jdbcTemplate.query(sql, productRowMapper, pageable.getSize(), pageable.getOffset());
         long total = count();
-        
+
         return new Page<>(products, pageable, total);
     }
-    
-    public Page<Product> findProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy, String sortDirection) {
+
+    public Page<Product> findProductsWithFilters(ProductFilter filter, Pageable pageable, String sortBy,
+            String sortDirection) {
         StringBuilder sql = new StringBuilder("""
                 SELECT product_id, category_id, product_name, description, price, cost_price,
                        sku, brand, image_url, is_active, created_at, updated_at
                 FROM products
                 WHERE 1=1
                 """);
-        
+
         List<Object> params = new ArrayList<>();
         buildFilterConditions(sql, filter, params);
-        
+
         String safeSort = SortValidator.getSafeProductSortField(sortBy);
         String safeDirection = SortValidator.getSafeDirection(sortDirection);
         sql.append(String.format(" ORDER BY %s %s", safeSort, safeDirection));
         sql.append(" LIMIT ? OFFSET ?");
-        
+
         params.add(pageable.getSize());
         params.add(pageable.getOffset());
-        
+
         List<Product> products = jdbcTemplate.query(sql.toString(), productRowMapper, params.toArray());
         long total = countProductsWithFilters(filter);
-        
+
         return new Page<>(products, pageable, total);
     }
-    
+
     private void buildFilterConditions(StringBuilder sql, ProductFilter filter, List<Object> params) {
         if (filter.getMinPrice() != null) {
             sql.append(" AND price >= ?");
             params.add(filter.getMinPrice());
         }
-        
+
         if (filter.getMaxPrice() != null) {
             sql.append(" AND price <= ?");
             params.add(filter.getMaxPrice());
         }
-        
+
         if (filter.getCategoryId() != null) {
             sql.append(" AND category_id = ?");
             params.add(filter.getCategoryId());
         }
-        
+
         if (filter.getSearchTerm() != null && !filter.getSearchTerm().trim().isEmpty()) {
             sql.append(" AND (product_name ILIKE ? OR description ILIKE ?)");
             String searchPattern = "%" + filter.getSearchTerm() + "%";
             params.add(searchPattern);
             params.add(searchPattern);
         }
-        
+
         if (filter.getIsActive() != null) {
             sql.append(" AND is_active = ?");
             params.add(filter.getIsActive());
         }
     }
-    
+
     private long countProductsWithFilters(ProductFilter filter) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM products WHERE 1=1");
         List<Object> params = new ArrayList<>();
         buildFilterConditions(sql, filter, params);
-        
+
         Long count = jdbcTemplate.queryForObject(sql.toString(), Long.class, params.toArray());
         return count != null ? count : 0L;
     }
-    
+
     public List<Product> searchProducts(String searchTerm) {
         String sql = """
                 SELECT product_id, category_id, product_name, description, price, cost_price,
@@ -310,7 +312,7 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
         String searchPattern = "%" + searchTerm + "%";
         return jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern);
     }
-    
+
     public Page<Product> searchProductsPaginated(String searchTerm, Pageable pageable) {
         String sql = """
                 SELECT product_id, category_id, product_name, description, price, cost_price,
@@ -321,25 +323,35 @@ public class ProductRepository implements GenericRepository<Product, Integer> {
                 LIMIT ? OFFSET ?
                 """;
         String searchPattern = "%" + searchTerm + "%";
-        List<Product> products = jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern, pageable.getSize(), pageable.getOffset());
-        
+        List<Product> products = jdbcTemplate.query(sql, productRowMapper, searchPattern, searchPattern,
+                pageable.getSize(), pageable.getOffset());
+
         String countSql = "SELECT COUNT(*) FROM products WHERE product_name ILIKE ? OR description ILIKE ?";
         Long total = jdbcTemplate.queryForObject(countSql, Long.class, searchPattern, searchPattern);
-        
+
         return new Page<>(products, pageable, total != null ? total : 0);
     }
-    
+
     public List<Product> findAllSorted(String sortBy, String sortDirection) {
         String safeSort = SortValidator.getSafeProductSortField(sortBy);
         String safeDirection = SortValidator.getSafeDirection(sortDirection);
-        
+
         String sql = String.format("""
                 SELECT product_id, category_id, product_name, description, price, cost_price,
                        sku, brand, image_url, is_active, created_at, updated_at
                 FROM products
                 ORDER BY %s %s
                 """, safeSort, safeDirection);
-        
+
         return jdbcTemplate.query(sql, productRowMapper);
+    }
+
+    public List<Product> findRecentlyAdded(int limit) {
+        String sql = """
+                 SELECT product_id, category_id, product_name, description, price, cost_price,
+                        sku, brand, image_url, is_active, created_at, updated_at
+                 FROM products ORDER BY created_at DESC LIMIT ?
+                \s""";
+        return jdbcTemplate.query(sql, productRowMapper, limit);
     }
 }

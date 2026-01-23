@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InventoryResponse {
-    
+
     private int inventoryId;
     private int productId;
     private String productName;
-    private int quantityInStock;
+    private int stockQuantity;
     private int reorderLevel;
     private LocalDateTime lastRestocked;
 
