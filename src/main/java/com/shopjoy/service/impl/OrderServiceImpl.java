@@ -21,8 +21,7 @@ import com.shopjoy.service.InventoryService;
 import com.shopjoy.service.OrderService;
 import com.shopjoy.service.ProductService;
 import com.shopjoy.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class OrderServiceImpl implements OrderService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OrderServiceImpl.class);
+
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -84,8 +83,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public OrderResponse createOrder(CreateOrderRequest request) {
-        logger.info("Creating order for user ID: {}", request.getUserId());
-
         userService.getUserById(request.getUserId());
 
         if (request.getShippingAddress() == null || request.getShippingAddress().trim().isEmpty()) {
@@ -135,7 +132,6 @@ public class OrderServiceImpl implements OrderService {
             orderItemRepository.save(orderItem);
         }
 
-        logger.info("Created order with ID: {}", createdOrder.getOrderId());
 
         return convertToResponse(createdOrder);
     }
@@ -190,8 +186,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional()
     public OrderResponse updateOrderStatus(Integer orderId, OrderStatus newStatus) {
-        logger.info("Updating order {} status to: {}", orderId, newStatus);
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
         OrderStatus currentStatus = order.getStatus();
@@ -202,7 +196,6 @@ public class OrderServiceImpl implements OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         Order updatedOrder = orderRepository.update(order);
-        logger.info("Successfully updated order {} status to: {}", orderId, newStatus);
 
         return convertToResponse(updatedOrder);
     }
@@ -259,8 +252,6 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional()
     public OrderResponse cancelOrder(Integer orderId) {
-        logger.info("Cancelling order ID: {}", orderId);
-
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
 
@@ -275,14 +266,12 @@ public class OrderServiceImpl implements OrderService {
 
         for (OrderItem item : orderItems) {
             inventoryService.releaseStock(item.getProductId(), item.getQuantity());
-            logger.debug("Released {} units of product ID: {}", item.getQuantity(), item.getProductId());
         }
 
         order.setStatus(OrderStatus.CANCELLED);
         order.setUpdatedAt(LocalDateTime.now());
 
         Order cancelledOrder = orderRepository.update(order);
-        logger.info("Successfully cancelled order ID: {}", orderId);
 
         return convertToResponse(cancelledOrder);
     }
@@ -348,7 +337,7 @@ public class OrderServiceImpl implements OrderService {
             UserResponse user = userService.getUserById(order.getUserId());
             userName = user.getFirstName() + " " + user.getLastName();
         } catch (Exception e) {
-            logger.warn("Could not fetch user name for order {}: {}", order.getOrderId(), e.getMessage());
+            // Ignore user fetch errors
         }
 
         List<OrderItem> items = orderItemRepository.findByOrderId(order.getOrderId());
@@ -358,7 +347,7 @@ public class OrderServiceImpl implements OrderService {
                 ProductResponse product = productService.getProductById(item.getProductId());
                 productName = product.getProductName();
             } catch (Exception e) {
-                logger.warn("Could not fetch product name for item {}: {}", item.getOrderItemId(), e.getMessage());
+                // Ignore product fetch errors
             }
             return OrderItemMapper.toOrderItemResponse(item, productName);
         }).collect(Collectors.toList());
