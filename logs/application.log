@@ -2863,3 +2863,14 @@
 2026-01-28 09:07:15.044 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - After  cleanup stats (total=2/5, idle=2/2, active=0, waiting=0)
 2026-01-28 09:07:15.044 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - Fill pool skipped, pool has sufficient level or currently being filled.
 2026-01-28 09:07:39.262 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - keepalive: connection org.postgresql.jdbc.PgConnection@471a9e8c is alive
+2026-01-28 09:07:45.051 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - Before cleanup stats (total=2/5, idle=2/2, active=0, waiting=0)
+2026-01-28 09:07:45.051 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - After  cleanup stats (total=2/5, idle=2/2, active=0, waiting=0)
+2026-01-28 09:07:45.052 [ShopJoyHikariCP:housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - Fill pool skipped, pool has sufficient level or currently being filled.
+2026-01-28 09:08:06.107 [SpringApplicationShutdownHook] INFO  o.s.boot.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2026-01-28 09:08:06.230 [tomcat-shutdown] INFO  o.s.boot.tomcat.GracefulShutdown - Graceful shutdown complete
+2026-01-28 09:08:06.257 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - ShopJoyHikariCP - Shutdown initiated...
+2026-01-28 09:08:06.257 [SpringApplicationShutdownHook] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - Before shutdown stats (total=2/5, idle=2/2, active=0, waiting=0)
+2026-01-28 09:08:06.260 [ShopJoyHikariCP:connection-closer] DEBUG com.zaxxer.hikari.pool.PoolBase - ShopJoyHikariCP - Closing connection org.postgresql.jdbc.PgConnection@471a9e8c: (connection evicted)
+2026-01-28 09:08:06.262 [ShopJoyHikariCP:connection-closer] DEBUG com.zaxxer.hikari.pool.PoolBase - ShopJoyHikariCP - Closing connection org.postgresql.jdbc.PgConnection@26e61e44: (connection evicted)
+2026-01-28 09:08:06.265 [SpringApplicationShutdownHook] DEBUG com.zaxxer.hikari.pool.HikariPool - ShopJoyHikariCP - After  shutdown stats (total=0/5, idle=0/2, active=0, waiting=0)
+2026-01-28 09:08:06.265 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - ShopJoyHikariCP - Shutdown completed.
