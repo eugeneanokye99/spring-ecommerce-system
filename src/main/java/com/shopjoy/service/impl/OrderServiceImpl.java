@@ -4,6 +4,8 @@ import com.shopjoy.dto.mapper.OrderItemMapper;
 import com.shopjoy.dto.mapper.OrderMapper;
 import com.shopjoy.dto.request.CreateOrderItemRequest;
 import com.shopjoy.dto.request.CreateOrderRequest;
+import com.shopjoy.dto.request.UpdateOrderItemRequest;
+import com.shopjoy.dto.request.UpdateOrderRequest;
 import com.shopjoy.dto.response.OrderItemResponse;
 import com.shopjoy.dto.response.OrderResponse;
 import com.shopjoy.dto.response.ProductResponse;
@@ -286,6 +288,99 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findAll().stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
+    }
+
+@Transactional(isolation = Isolation.SERIALIZABLE)
+public OrderResponse updateOrder(Integer orderId, UpdateOrderRequest request) {
+    Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+
+    if (order.getStatus() != OrderStatus.PENDING) {
+        throw new InvalidOrderStateException(orderId, order.getStatus().toString(), 
+            "update (can only update PENDING orders)");
+    }
+
+    // Update basic order fields
+    if (request.getShippingAddress() != null && !request.getShippingAddress().trim().isEmpty()) {
+        order.setShippingAddress(request.getShippingAddress());
+    }
+
+    if (request.getPaymentMethod() != null) {
+        order.setPaymentMethod(request.getPaymentMethod());
+    }
+
+    if (request.getNotes() != null) {
+        order.setNotes(request.getNotes());
+    }
+
+    // Handle order items if provided
+    if (request.getOrderItems() != null && !request.getOrderItems().isEmpty()) {
+        List<OrderItem> existingItems = orderItemRepository.findByOrderId(orderId);
+        
+        // Release inventory for old items
+        for (OrderItem item : existingItems) {
+            inventoryService.releaseStock(item.getProductId(), item.getQuantity());
+        }
+
+        // Delete old items
+        for (OrderItem item : existingItems) {
+            orderItemRepository.delete(item.getOrderItemId());
+        }
+
+        // Validate and reserve inventory for new items
+        double newTotal = 0.0;
+        for (UpdateOrderItemRequest itemReq : request.getOrderItems()) {
+            ProductResponse product = productService.getProductById(itemReq.getProductId());
+            if (!product.isActive()) {
+                throw new ValidationException("Product " + product.getProductName() + " is not active");
+            }
+            if (!inventoryService.hasAvailableStock(itemReq.getProductId(), itemReq.getQuantity())) {
+                throw new ValidationException("Insufficient stock for product: " + product.getProductName());
+            }
+            inventoryService.reserveStock(itemReq.getProductId(), itemReq.getQuantity());
+            newTotal += itemReq.getPrice() * itemReq.getQuantity();
+        }
+
+        // Create new order items
+        for (UpdateOrderItemRequest itemReq : request.getOrderItems()) {
+            OrderItem orderItem = OrderItem.builder()
+                    .orderId(orderId)
+                    .productId(itemReq.getProductId())
+                    .quantity(itemReq.getQuantity())
+                    .unitPrice(itemReq.getPrice())
+                    .subtotal(itemReq.getQuantity() * itemReq.getPrice())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            orderItemRepository.save(orderItem);
+        }
+
+        // Update total amount
+        order.setTotalAmount(newTotal);
+    }
+
+    order.setUpdatedAt(LocalDateTime.now());
+    Order updatedOrder = orderRepository.update(order);
+    
+    return convertToResponse(updatedOrder);
+}
+
+
+    @Override
+    @Transactional()
+    public void deleteOrder(Integer orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order", "id", orderId));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new InvalidOrderStateException(orderId, order.getStatus().toString(), "delete (can only delete PENDING orders)");
+        }
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrderId(orderId);
+        for (OrderItem item : orderItems) {
+            inventoryService.releaseStock(item.getProductId(), item.getQuantity());
+        }
+
+        orderRepository.delete(orderId);
     }
 
     private void validateStatusTransition(OrderStatus currentStatus, OrderStatus newStatus) {
