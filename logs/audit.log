@@ -1,3 +1,1 @@
-2026-01-28 08:46:30.231 - [2026-01-28 08:46:30.231] AUDIT: STOCK RESERVED - Method: reserveStock, Arguments: [18, 2]
-2026-01-28 08:46:30.253 - [2026-01-28 08:46:30.253] AUDIT: STOCK RESERVED - Method: reserveStock, Arguments: [41, 2]
-2026-01-28 08:46:30.309 - [2026-01-28 08:46:30.308] AUDIT: ORDER UPDATED - Method: updateOrder, Arguments: [4, com.shopjoy.dto.request.UpdateOrderRequest@1364840f]
+2026-02-02 09:55:38.123 - [2026-02-02 09:55:38.123] AUDIT: PRODUCT CREATED - Method: createProduct, Arguments: [com.shopjoy.dto.request.CreateProductRequest@3eb0adc6]
